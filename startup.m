@@ -12,11 +12,3 @@ addpath(fullfile(projectRootDir,'scripts'),'-end');
 Simulink.fileGenControl('set',...
     'CacheFolder',fullfile(projectRootDir,'work'),...
     'CodeGenFolder',fullfile(projectRootDir,'work'));
-
-% load bus object data types
-%load battery_bus_types
-%load boost_converter_bus_types
-%load bus_load_bus_types
-%load source_bus
-%load guidance_bus
-%load grid_state_bus
