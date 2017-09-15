@@ -1,5 +1,5 @@
 function plotPath(t,states)
-% plotMotions.m     e.anderlini@ucl.ac.uk     15/09/2017
+% plotPath.m     e.anderlini@ucl.ac.uk     15/09/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function is used to plot the path of the ROV.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

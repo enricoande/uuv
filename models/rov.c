@@ -152,7 +152,7 @@ void damping_force(SimStruct *S)
     // Compute the damping force: 
     for(i=0;i<DW_DSIZE;i++)
     {
-        dw[i] = D_L[i][i]* *vr[i] + D_Q[i][i]*abs(*vr[i])* *vr[i];
+        dw[i] = D_L[i][i]* *vr[i] + D_Q[i][i]*fabs(*vr[i])* *vr[i];
     }
     // N.B.: This relies on the assumption of diagonal damping matrices.
 }
