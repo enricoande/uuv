@@ -16,6 +16,8 @@ rovSimSetup;
 
 % Initial conditions:
 ics = zeros(12,1);
+thrust = zeros(6,1);
+rov.weight = 4.92056575e+03;
 
 tic;
 %% Load the Simulink file:

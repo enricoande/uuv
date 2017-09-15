@@ -41,8 +41,9 @@
 #define P_CB  3  // centre of buoyancy (m)
 #define P_IC  4  // initial conditions
 #define P_M   5  // inverse of the mass matrix
-#define P_DB  6  // rigid body damping matrix
-#define P_N   7  // number of elements in input
+#define P_DL  6  // rigid body linear damping matrix
+#define P_DQ  7  // rigid body quadratic damping matrix
+#define P_N   8  // number of elements in input
    
 // continuous state indices
 #define C_X   0  // (m)
@@ -76,16 +77,20 @@
 #define DW_TT  1 // translational transformation matrix
 #define     DW_TTSIZE 9 
 #define DW_RT  2 // rotational transformation matrix
-#define     DW_RTSIZE 9 
-#define DW_N   3 // size of dynamic work vector
+#define     DW_RTSIZE 9
+#define DW_D   3 // damping force vector
+#define     DW_DSIZE  6
+#define DW_N   4 // size of dynamic work vector
         
 // integer work vector indices
 #define IW_N   0 // size of integer work vector
 
 // input indices
-// #define I_SD    0      // state vector derivative input port #
-// #define   I_SDSIZE C_N // size of input port
-#define I_N    0       // # of input ports
+#define I_T    0       // thurst vector
+#define   I_TSIZE   6  // size of input port
+#define I_VR   1       // relative velocity vector
+#define   I_VRSIZE  6  // size of input port
+#define I_N    2       // # of input ports
 
 // output indices
 #define O_ST   0         // state output port #
@@ -119,6 +124,35 @@ void restoring_force(SimStruct *S)
     dw[5] = (rw[RW_B]*rw[RW_XB]-rw[RW_W]*rw[RW_XG])*cos(x[C_TH])\
             *sin(x[C_PH])+(rw[RW_B]*rw[RW_YB]-rw[RW_W]*rw[RW_YG])\
             *sin(x[C_TH]);
+}
+
+// ************************************************************************
+//  damping_force: Function that returns the damping force on the ROV.
+// N.B.: For greater efficiency, a dynamic work vector is used.
+// ************************************************************************
+void damping_force(SimStruct *S)
+{
+    // Set a pointer to the dynamic work vector for the damping force:
+    real_T *dw = (real_T*) ssGetDWork(S,DW_D);
+    // Set a pointer to the relative velocity input:
+    InputRealPtrsType vr = ssGetInputPortRealSignalPtrs(S,I_VR);
+    // Snatch and map the linear damping matrix:
+    const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
+    real_T D_L[6][6];
+    memcpy(D_L,DL1D,6*6*sizeof(real_T));
+    // Snatch and map the quadratic damping matrix:
+    const real_T *DQ1D = mxGetPr(ssGetSFcnParam(S,P_DQ));
+    real_T D_Q[6][6];
+    memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
+    // Counter:
+    int_T i;
+    
+    // Compute the damping force: 
+    for(i=0;i<DW_DSIZE;i++)
+    {
+        dw[i] = D_L[i][i]* *vr[i] + D_Q[i][i]*abs(*vr[i])* *vr[i];
+    }
+    // N.B.: This relies on the assumption of diagonal damping matrices.
 }
 
 // ************************************************************************
@@ -170,58 +204,66 @@ void transformation_matrix(SimStruct *S)
 static void mdlCheckParameters(SimStruct *S)
 {
 // Check 1st parameter: P_W
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_W)) != 1 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_W)) ) {
-      ssSetErrorStatus(S,"1st parameter, P_W, to S-function "
+        ssSetErrorStatus(S,"1st parameter, P_W, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
 // Check 2nd parameter: P_B
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_B)) != 1 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_B)) ) {
-      ssSetErrorStatus(S,"2nd parameter, P_B, to S-function "
+        ssSetErrorStatus(S,"2nd parameter, P_B, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
 // Check 3rd parameter: P_CG
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_CG)) != 3 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_CG)) ) {
-      ssSetErrorStatus(S,"3rd parameter, P_CG, to S-function "
+        ssSetErrorStatus(S,"3rd parameter, P_CG, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
 // Check 4th parameter: P_CB
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_CB)) != 3 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_CB)) ) {
-      ssSetErrorStatus(S,"4th parameter, P_CB, to S-function "
+        ssSetErrorStatus(S,"4th parameter, P_CB, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
 // Check 5th parameter: P_IC
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_IC)) != 12 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_IC)) ) {
-      ssSetErrorStatus(S,"5th parameter, P_IC, to S-function "
+        ssSetErrorStatus(S,"5th parameter, P_IC, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
 // Check 6th parameter: P_M
-  {
+    {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_M)) != 6*6 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_M)) ) {
-      ssSetErrorStatus(S,"6th parameter, P_M, to S-function "
+        ssSetErrorStatus(S,"6th parameter, P_M, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
-// Check 7th parameter: P_DB
-  {
-    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DB)) != 6*6 || 
-            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DB)) ) {
-      ssSetErrorStatus(S,"7th parameter, P_DB, to S-function "
+// Check 7th parameter: P_DL
+    {
+    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DL)) != 6*6 || 
+            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DL)) ) {
+        ssSetErrorStatus(S,"7th parameter, P_DL, to S-function "
+                       "\"Response Parameters\" are not dimensioned "
+                       "correctly or of type double");
+      return; } }
+// Check 8th parameter: P_DQ
+    {
+    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DQ)) != 6*6 || 
+            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DQ)) ) {
+        ssSetErrorStatus(S,"8th parameter, P_DQ, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
@@ -233,81 +275,88 @@ static void mdlCheckParameters(SimStruct *S)
 // ************************************************************************
 static void mdlInitializeSizes(SimStruct *S)
 {
-  //-----------------------------------------------------------------------      
-  //           *** P A R A M E T E R    S E T U P ***
-  //-----------------------------------------------------------------------  
-  //   #  Description                                Units      Dim
-  //-----------------------------------------------------------------------      
-  //   0. Weight                                       N         1
-  //   1. Buoyancy                                     N         1
-  //   2. Centre of gravity                            m         3
-  //   3. Centre of buoyancy                           m         3
-  //   4. Initial conditions                          mix       12
-  //   5. Inverse of the mass matrix                  mix       36
-  //   6. Rigid body damping matrix                   mix       36
+    //---------------------------------------------------------------------      
+    //           *** P A R A M E T E R    S E T U P ***
+    //---------------------------------------------------------------------  
+    //   #  Description                                Units      Dim
+    //---------------------------------------------------------------------      
+    //   0. Weight                                       N         1
+    //   1. Buoyancy                                     N         1
+    //   2. Centre of gravity                            m         3
+    //   3. Centre of buoyancy                           m         3
+    //   4. Initial conditions                          mix       12
+    //   5. Inverse of the mass matrix                  mix       36
+    //   6. Rigid body linear damping matrix            mix       36
+    //   7. Rigid body quadratic damping matrix         mix       36
 
-  ssSetNumSFcnParams(S, P_N); // total number of parameters
+    ssSetNumSFcnParams(S, P_N); // total number of parameters
   
-  // Catch error made by user in giving parameter list to Simulink block
-  // To make the mdlCheckParameters method active, it must be called as
-  // shown below. This feature is not allowable in real-time, coder use,
-  // so it is conditional on the MATLAB_MEX_FILE attribute. 
-  #if defined(MATLAB_MEX_FILE)
-  if( ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S) )
-  {
-      mdlCheckParameters(S);
-      if(ssGetErrorStatus(S) != NULL) return;
-  }
-  else return; // parameter mismatch error
-  #endif
+    // Catch error made by user in giving parameter list to Simulink block
+    // To make the mdlCheckParameters method active, it must be called as
+    // shown below. This feature is not allowable in real-time, coder use,
+    // so it is conditional on the MATLAB_MEX_FILE attribute. 
+    #if defined(MATLAB_MEX_FILE)
+    if( ssGetNumSFcnParams(S) == ssGetSFcnParamsCount(S) )
+    {
+        mdlCheckParameters(S);
+        if(ssGetErrorStatus(S) != NULL) return;
+    }
+    else return; // parameter mismatch error
+    #endif
 
-  //-----------------------------------------------------------------------        
-  //         *** C O N T I N U O U S    S T A T E    S E T U P ***
-  //-----------------------------------------------------------------------    
-  //   #                Description                 Units       Dim
-  //-----------------------------------------------------------------------  
-  //   1.               state vector derivative      mix         12
+    //---------------------------------------------------------------------        
+    //         *** C O N T I N U O U S    S T A T E    S E T U P ***
+    //---------------------------------------------------------------------    
+    //   #                Description                 Units       Dim
+    //---------------------------------------------------------------------  
+    //   1.               state vector derivative      mix         12
   
-  ssSetNumContStates(S,C_N);  // total number of continuous states           
+    ssSetNumContStates(S,C_N);  // total number of continuous states           
 
-  ssSetNumDiscStates(S,0); // total number of discrete states
+    ssSetNumDiscStates(S,0); // total number of discrete states
 
-  // Set number of input ports:
-  if (!ssSetNumInputPorts(S,I_N)) return;  
+    // Set number of input ports:
+    if (!ssSetNumInputPorts(S,I_N)) return;  
   
-//   // Set input port widths:
-//   ssSetInputPortWidth(S, I_SD, I_SDSIZE);
+    // Set input port widths:
+    ssSetInputPortWidth(S, I_T, I_TSIZE);
+    ssSetInputPortWidth(S, I_VR, I_VRSIZE);
 
-//   // If you add new inputs, you must add an element to the list below to
-//   // indicate if the input is used directly to compute an output.  
-//   ssSetInputPortDirectFeedThrough(S, I_SD, NO);
+    // If you add new inputs, you must add an element to the list below to
+    // indicate if the input is used directly to compute an output.  
+    ssSetInputPortDirectFeedThrough(S, I_T, NO);
+    ssSetInputPortDirectFeedThrough(S, I_VR, NO);
   
-  // Specify number of output ports:
-  if (!ssSetNumOutputPorts(S,O_N)) return; 
-  
-  // Specify output port widths:
-  ssSetOutputPortWidth(S, O_ST , O_STSIZE) ; 
-  
-  // Set up work vectors:
-  // If you need several arrays or 2D arrays of work vectors, then use
-  // DWork.
-  ssSetNumRWork(S, RW_N); 
-  ssSetNumIWork(S, IW_N);
-  ssSetNumPWork(S, 0);
-  ssSetNumModes(S, 0);
-  ssSetNumDWork(S, DW_N);
-  
-  // Set up the width and type of the dynamic work vectors:
-  ssSetDWorkWidth(S, DW_R, DW_RSIZE);
-  ssSetDWorkWidth(S, DW_TT, DW_TTSIZE);
-  ssSetDWorkWidth(S, DW_RT, DW_RTSIZE);
-  ssSetDWorkDataType(S, DW_R, SS_DOUBLE);
-  
-  // Set up sample times:
-  ssSetNumSampleTimes(  S, 1);
-  ssSetNumNonsampledZCs(S, 0);
+    // Specify number of output ports:
+    if (!ssSetNumOutputPorts(S,O_N)) return; 
 
-  ssSetOptions(S, SS_OPTION_RUNTIME_EXCEPTION_FREE_CODE);
+    // Specify output port widths:
+    ssSetOutputPortWidth(S, O_ST , O_STSIZE) ; 
+
+    // Set up work vectors:
+    // If you need several arrays or 2D arrays of work vectors, then use
+    // DWork.
+    ssSetNumRWork(S, RW_N); 
+    ssSetNumIWork(S, IW_N);
+    ssSetNumPWork(S, 0);
+    ssSetNumModes(S, 0);
+    ssSetNumDWork(S, DW_N);
+
+    // Set up the width and type of the dynamic work vectors:
+    ssSetDWorkWidth(S, DW_R, DW_RSIZE);
+    ssSetDWorkWidth(S, DW_TT, DW_TTSIZE);
+    ssSetDWorkWidth(S, DW_RT, DW_RTSIZE);
+    ssSetDWorkWidth(S, DW_D, DW_DSIZE);
+    ssSetDWorkDataType(S, DW_R, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_TT, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_RT, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_D, SS_DOUBLE);
+
+    // Set up sample times:
+    ssSetNumSampleTimes(  S, 1);
+    ssSetNumNonsampledZCs(S, 0);
+
+    ssSetOptions(S, SS_OPTION_RUNTIME_EXCEPTION_FREE_CODE);
 }
 
 // ************************************************************************
@@ -317,8 +366,8 @@ static void mdlInitializeSizes(SimStruct *S)
 // ************************************************************************
 static void mdlInitializeSampleTimes(SimStruct *S)
 {
-  ssSetSampleTime(S, 0, CONTINUOUS_SAMPLE_TIME);
-  ssSetOffsetTime(S, 0, 0.0);
+    ssSetSampleTime(S, 0, CONTINUOUS_SAMPLE_TIME);
+    ssSetOffsetTime(S, 0, 0.0);
 }
 
 // ************************************************************************
@@ -328,58 +377,76 @@ static void mdlInitializeSampleTimes(SimStruct *S)
 #if defined(MDL_INITIALIZE_CONDITIONS)
 static void mdlInitializeConditions(SimStruct *S)
 {
-  // Set a pointer to the continuous state vector:
-  real_T *x  = ssGetContStates(S);
+    // Set a pointer to the continuous state vector:
+    real_T *x  = ssGetContStates(S);
+
+    // Set a pointer to the real work vector:
+    real_T *rw = ssGetRWork(S);
+
+    // Set a pointer to the dynamic work vectors:
+    real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
+    real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
+    real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
+    real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
+
+    // Initialize counter variables:
+    int i,j;
   
-  // Set a pointer to the real work vector:
-  real_T *rw = ssGetRWork(S);
+    // Snatch and map all the needed parameters:  
+    const real_T *w = mxGetPr(ssGetSFcnParam(S,P_W));  
+    const real_T *b = mxGetPr(ssGetSFcnParam(S,P_B));
+    const real_T *cg = mxGetPr(ssGetSFcnParam(S,P_CG));  
+    const real_T *cb = mxGetPr(ssGetSFcnParam(S,P_CB));
+    const real_T *ics = mxGetPr(ssGetSFcnParam(S,P_IC));
+
+    // Initialize the real work vector:
+    rw[RW_W]  = w[0];
+    rw[RW_B]  = b[0];
+    rw[RW_XG] = cg[0];
+    rw[RW_YG] = cg[1];
+    rw[RW_ZG] = cg[2];
+    rw[RW_XB] = cb[0];
+    rw[RW_YB] = cb[1];
+    rw[RW_ZB] = cb[2];
   
-  // Set a pointer to the dynamic work vectors:
-  real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
-  real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
-  real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
+    // Initialize the dynamic work vectors:
+    for (i=0;i<DW_RSIZE;i++)
+    {
+        dw_r[i] = 0.0;
+        dw_d[i] = 0.0;
+    }
+    for (i=0;i<DW_TTSIZE;i++)
+    {
+        dw_tt[i] = 0.0;
+        dw_rt[i] = 0.0;
+    }
   
-  // Initialize counter variables:
-  int i,j;
+    // Debugging:
+//     for(i=0;i<RW_N;i++) printf("%f\n", rw[i]);
+//     for(i=0;i<C_N;i++) printf("%f\n", ics[i]);
+//     const real_T *M1D = mxGetPr(ssGetSFcnParam(S,P_M));
+//     real_T M_inv[6][6];
+//     memcpy(M_inv,M1D,6*6*sizeof(real_T));
+//     for(i=0;i<6;i++){
+//         for(j=0;j<6;j++) printf("%f\t", M_inv[i][j]);
+//         printf("\n");}
+//     const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
+//     real_T D_L[6][6];
+//     memcpy(D_L,DL1D,6*6*sizeof(real_T));
+//     for(i=0;i<6;i++){
+//     for(j=0;j<6;j++) printf("%f\t", D_L[i][j]);
+//     printf("\n");}
+//     const real_T *DQ1D = mxGetPr(ssGetSFcnParam(S,P_DQ));
+//     real_T D_Q[6][6];
+//     memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
+//     for(i=0;i<6;i++){
+//     for(j=0;j<6;j++) printf("%f\t", D_Q[i][j]);
+//     printf("\n");}
   
-  // Snatch and map all the needed parameters:  
-  const real_T *w = mxGetPr(ssGetSFcnParam(S,P_W));  
-  const real_T *b = mxGetPr(ssGetSFcnParam(S,P_B));
-  const real_T *cg = mxGetPr(ssGetSFcnParam(S,P_CG));  
-  const real_T *cb = mxGetPr(ssGetSFcnParam(S,P_CB));
-  const real_T *ics = mxGetPr(ssGetSFcnParam(S,P_IC));
-  
-  // Initialize the real work vector:
-  rw[RW_W]  = w[0];
-  rw[RW_B]  = b[0];
-  rw[RW_XG] = cg[0];
-  rw[RW_YG] = cg[1];
-  rw[RW_ZG] = cg[2];
-  rw[RW_XB] = cb[0];
-  rw[RW_YB] = cb[1];
-  rw[RW_ZB] = cb[2];
-  
-  // Initialize the dynamic work vectors:
-  for (i=0;i<DW_RSIZE;i++) dw_r[i] = 0.0;
-  for (i=0;i<DW_TTSIZE;i++) {
-      dw_tt[i] = 0.0;
-      dw_rt[i] = 0.0;
-  }
-  
-  // Debugging:
-//   for(i=0;i<RW_N;i++) printf("%f\n", rw[i]);
-//   for(i=0;i<C_N;i++) printf("%f\n", ics[i]);
-//   const real_T *M1D = mxGetPr(ssGetSFcnParam(S,P_M));
-//   real_T M_inv[6][6];
-//   memcpy(M_inv,M1D,6*6*sizeof(real_T));
-//   for(i=0;i<6;i++){
-//       for(j=0;j<6;j++) printf("%f\t", M_inv[i][j]);
-//       printf("\n");}
-  
-  // Initialize the state vector:
-  for(i=0;i<C_N;i++) x[i]=ics[i];
-  
-  ssSetSimStateCompliance(S,USE_DEFAULT_SIM_STATE);
+    // Initialize the state vector:
+    for(i=0;i<C_N;i++) x[i]=ics[i];
+
+    ssSetSimStateCompliance(S,USE_DEFAULT_SIM_STATE);
 }
 #endif
 
@@ -417,6 +484,9 @@ static void mdlDerivatives(SimStruct *S)
   real_T *x  = ssGetContStates(S); // ptr to continous states
   real_T *dx = ssGetdX(S);         // ptr to right side of x' = f(x,u,t)
   
+  // Set a pointer to the thrust vector:
+  InputRealPtrsType thrust = ssGetInputPortRealSignalPtrs(S,I_T);
+  
   int_T i,j,k;   // counters
   real_T tmp;    // temporary value
   
@@ -425,14 +495,23 @@ static void mdlDerivatives(SimStruct *S)
   real_T M_inv[6][6];
   memcpy(M_inv,M1D,6*6*sizeof(real_T));
   
-  // Snatch and map the rigid body damping matrix: 
-  const real_T *D1D = mxGetPr(ssGetSFcnParam(S,P_DB));
-  real_T C_RB[6][6];
-  memcpy(C_RB,D1D,6*6*sizeof(real_T));
+  // Snatch and map the rigid body linear damping matrix: 
+  const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
+  real_T D_L[6][6];
+  memcpy(D_L,DL1D,6*6*sizeof(real_T));
+  
+  // Snatch and map the rigid body quadratic damping matrix: 
+  const real_T *DQ1D = mxGetPr(ssGetSFcnParam(S,P_DQ));
+  real_T D_Q[6][6];
+  memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
   
   // Compute the restoring force:
   restoring_force(S);
   real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
+  
+  // Compute the damping force:
+  damping_force(S);
+  real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
   
   // Compute the transformation matrix:
   transformation_matrix(S);
@@ -461,7 +540,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<6;i++){
       tmp = 0.0;
       for (j=0;j<6;j++)
-          tmp += M_inv[i][j] * (-dw_r[j]-C_RB[i][j]*x[j+6]);
+          tmp += M_inv[i][j] * (-dw_r[j]-dw_d[j]+*thrust[j]);
       dx[i+6] = tmp;
   }
 }
