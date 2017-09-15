@@ -96,7 +96,7 @@
 #define O_ST   0         // state output port #
 #define   O_STSIZE C_N   // states (m and m/s)
 #define O_F    1
-#define   O_FSIZE  12    // restoring, & damping forces
+#define   O_FSIZE  2     // restoring, & damping forces
 #define O_N    2         // # of output ports
 
 // ---------------------  Support Functions  ------------------------------
@@ -473,9 +473,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     int_T i;   // counter
     for(i=0;i<O_STSIZE;i++) ySt[i] = x[i];
     
-    // Output the forces acting on the ROV:
-    for(i=0;i<DW_RSIZE;i++) yF[i] = dw_r[i];
-    for(i=0;i<DW_DSIZE;i++) yF[i+DW_RSIZE] = dw_d[i];
+    // Output the for
+  
 }
 
 // ************************************************************************
@@ -535,8 +534,8 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<3;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_tt[k]*x[j+6];
           k++;
+          tmp += dw_tt[k]*x[j+6];
       }
       dx[i] = tmp;
   }
@@ -544,8 +543,8 @@ static void mdlDerivatives(SimStruct *S)
   for (i=3;i<6;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_rt[k]*x[j+9];
           k++;
+          tmp += dw_rt[k]*x[j+9];
       }
       dx[i] = tmp;
   }

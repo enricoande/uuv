@@ -16,8 +16,9 @@ rovSimSetup;
 
 % Initial conditions:
 ics = zeros(12,1);
-thrust = zeros(6,1);
+thrust = [100;0;0;0;0;0];
 rov.weight = 4.92056575e+03;
+v_c = [0;0;0;0;0;0];      % current velocity
 
 tic;
 %% Load the Simulink file:
@@ -37,5 +38,11 @@ toc;
 % Extract the data to be plotted:
 t = sout.tout;
 x = sout.get('logsout').getElement('state').Values.Data;
+f = [sout.get('logsout').getElement('thrust').Values.Data,...
+    sout.get('logsout').getElement('forces').Values.Data];
 % Plot the ROV's motions:
 plotMotions(t,x);
+% Plot the ROV's forces:
+plotForces(t,f);
+% % Plot the ROV's path:
+% plotPath(t,x);

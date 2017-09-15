@@ -19,6 +19,7 @@ ylabel('Displacement (m)','Interpreter','Latex');
 l = legend('$x$','$y$','$z$','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
+set(gca,'TickLabelInterpreter','Latex')
 subplot(2,1,2);
 plot(t,rad2deg(states(:,4)),'--','Color',[0.4940,0.1840,0.5560]);
 hold on;
@@ -31,6 +32,7 @@ ylabel('Rotation ($^\circ$)','Interpreter','Latex');
 l = legend('$\phi$','$\theta$','$\psi$','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
+set(gca,'TickLabelInterpreter','Latex')
 set(gcf,'color','w');
 
 %% Translational and rotational velocity in the body-fixed reference frame:
@@ -46,6 +48,7 @@ ylabel('Translational velocity (m/s)','Interpreter','Latex');
 l = legend('$u$','$v$','$w$','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
+set(gca,'TickLabelInterpreter','Latex')
 subplot(2,1,2);
 plot(t,rad2deg(states(:,10)),'--','Color',[0.4940,0.1840,0.5560]);
 hold on;
@@ -58,6 +61,7 @@ ylabel('Rotational velocity ($^\circ$/s)','Interpreter','Latex');
 l = legend('$p$','$q$','$r$','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
+set(gca,'TickLabelInterpreter','Latex')
 set(gcf,'color','w');
 
 end
