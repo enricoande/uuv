@@ -16,10 +16,10 @@ rovSimSetup;
 
 % Initial conditions:
 ics = zeros(12,1);
-thrust = [0;0;0;0;0;0];
+n = [0;0;0;0;0];
 rov.weight = 4.92056575e+03;
 v_c = [0;0;0;0;0;0];      % current velocity
-mdl.tEnd = 120;
+mdl.tEnd = 20;
 
 tic;
 %% Load the Simulink file:
@@ -47,5 +47,5 @@ plotMotions(t,x);
 plotForces(t,f);
 % % Plot the ROV's path:
 % plotPath(t,x);
-% Animate the ROV's motion:
-animateAUV(t,x,50);
+% % Animate the ROV's motion:
+% animateAUV(t,x,50);
