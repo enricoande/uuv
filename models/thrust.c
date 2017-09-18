@@ -38,7 +38,9 @@
 #define P_TH  3  // thrust loss coefficient
 #define P_T   4  // thrust allocation matrix
 #define P_N   5  // number of parameters
-  
+
+#define KT_SIZE 4
+        
 // Continuous state indices:
 #define C_N   0  // no. continuous states
 
@@ -47,7 +49,7 @@
         
 // Dynamic work vector indices:
 #define DW_F   0 // propulsors' force
-#define     DW_FSIZE 5
+#define    DW_FSIZE 5
 #define DW_N   1 // size of dynamic work vector
         
 // Integer work vector indices:
@@ -81,20 +83,35 @@ void propulsors_force(SimStruct *S)
     const real_T *TH1D = mxGetPr(ssGetSFcnParam(S,P_TH));
     real_T Theta[DW_FSIZE][2];
     memcpy(Theta,TH1D,DW_FSIZE*2*sizeof(real_T));
-    // Set a pointer to the control input:
+    // Get the thrust loss factor matrix:
+    const real_T *KT1D = mxGetPr(ssGetSFcnParam(S,P_KT));
+    real_T K_T[KT_SIZE][2];
+    memcpy(K_T,KT1D,KT_SIZE*2*sizeof(real_T));
+    // Set a pointer to the inputs:
     InputRealPtrsType n = ssGetInputPortRealSignalPtrs(S,I_U);
+    InputRealPtrsType J = ssGetInputPortRealSignalPtrs(S,I_J);
     
     // Compute the propulsors' force: 
-    int_T i;
-    real_T theta;
+    int_T i,j;
+    real_T theta, kt;
     for(i=0;i<DW_FSIZE;i++)
         // Compute the thrust loss factor:
         if (*n[i]>0)
+        {
             theta = Theta[i][0];
+            kt = 0.0;
+            for (j=0;j<KT_SIZE;j++)
+                kt += K_T[j][0]*pow(*J[0],KT_SIZE-j-1.0);
+        }
         else
+        {
             theta = Theta[i][1];
+            kt = 0.0;
+            for (j=0;j<KT_SIZE;j++)
+                kt += K_T[j][1]*pow(*J[0],KT_SIZE-j-1.0);
+        }
         // Compute the propulsors' force:
-        dw[i] = 0.0; // rho[i]*pow(prop_diam[i],4.) * fabs(*n[i]) * *n[i] *theta;
+        dw[i] = rho[i]*pow(prop_diam[i],4.)*fabs(*n[i])*(*n[i])*theta*kt;
 }
 // ------------------------------------------------------------------------
         
@@ -194,7 +211,7 @@ static void mdlInitializeSizes(SimStruct *S)
     // If you add new inputs, you must add an element to the list below to
     // indicate if the input is used directly to compute an output.  
     ssSetInputPortDirectFeedThrough(S, I_U, YES);
-    ssSetInputPortDirectFeedThrough(S, I_J, NO);
+    ssSetInputPortDirectFeedThrough(S, I_J, YES);
   
     // Specify number of output ports:
     if (!ssSetNumOutputPorts(S,O_N)) return; 
