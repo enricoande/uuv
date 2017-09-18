@@ -1,4 +1,4 @@
-function animateAUV(t,x,nframes)
+function animateAUV(t,x,nframes,l)
 % animateAUV.m     e.anderlini@ucl.ac.uk     15/09/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function is used to plot the path of the ROV.
@@ -12,7 +12,13 @@ for i=1:n
     t_anim(i) = t((i-1)*nframes+1);
     x_anim(i,:) = x((i-1)*nframes+1,1:6);
 end
-
+% Compute the position of the three extremities of the triad:
+p = zeros(n,3,3);
+for i=1:n
+    for j=1:3
+        p(i,:,j) = x_anim(i,1:3)+rotation(x_anim(i,4:6),);
+    end
+end
 
 %%
 figure;
