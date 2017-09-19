@@ -45,12 +45,10 @@
 #define C_N   0  // no. continuous states
 
 // Real work vector indices:
-#define RW_N   0 // size of real work vector
+#define RW_N   5 // size of real work vector
         
 // Dynamic work vector indices:
-#define DW_F   0 // propulsors' force
-#define    DW_FSIZE 5
-#define DW_N   1 // size of dynamic work vector
+#define DW_N   0 // size of dynamic work vector
         
 // Integer work vector indices:
 #define IW_N   0 // size of integer work vector
@@ -58,8 +56,8 @@
 // Input indices:
 #define I_U    0       // control input: no. prop. revs
 #define   I_USIZE  5   // size of input port
-#define I_J   1        // advance ratio
-#define   I_JSIZE  1   // size of input port
+#define I_V   1        // propellers speed in water
+#define   I_VSIZE  1   // size of input port
 #define I_N    2       // # of input ports
 
 // Output indices:
@@ -74,44 +72,53 @@
 // ************************************************************************
 void propulsors_force(SimStruct *S)
 {
-    // Set a pointer to the dynamic work vector for the propulsors' force:
-    real_T *dw = (real_T*) ssGetDWork(S,DW_F);
+//     // Set a pointer to the dynamic work vector for the propulsors' force:
+//     real_T *dw = (real_T*) ssGetDWork(S,DW_F);
+    // Set a pointer to the real work vector:
+    real_T *rw = ssGetRWork(S);
     // Get the water density and the propeller diameter:
     const real_T *rho = mxGetPr(ssGetSFcnParam(S,P_DE));
     const real_T *prop_diam = mxGetPr(ssGetSFcnParam(S,P_PD));
     // Get the thrust deduction factor matrix:
     const real_T *TH1D = mxGetPr(ssGetSFcnParam(S,P_TH));
-    real_T Theta[DW_FSIZE][2];
-    memcpy(Theta,TH1D,DW_FSIZE*2*sizeof(real_T));
+    real_T Theta[RW_N][2];
+    memcpy(Theta,TH1D,RW_N*2*sizeof(real_T));
     // Get the thrust loss factor matrix:
     const real_T *KT1D = mxGetPr(ssGetSFcnParam(S,P_KT));
     real_T K_T[KT_SIZE][2];
     memcpy(K_T,KT1D,KT_SIZE*2*sizeof(real_T));
     // Set a pointer to the inputs:
     InputRealPtrsType n = ssGetInputPortRealSignalPtrs(S,I_U);
-    InputRealPtrsType J = ssGetInputPortRealSignalPtrs(S,I_J);
+    InputRealPtrsType v_a = ssGetInputPortRealSignalPtrs(S,I_V);
     
     // Compute the propulsors' force: 
     int_T i,j;
-    real_T theta, kt;
-    for(i=0;i<DW_FSIZE;i++)
+    real_T theta, kt, J_a;
+    for(i=0;i<RW_N;i++)
+    {
+        // Compute the propulsor's advance ratio:
+        if (*n[i]==0)
+            J_a=0.0;
+        else
+            J_a = (*v_a[0])/(*n[i] *prop_diam[i]);
         // Compute the thrust loss factor:
         if (*n[i]>0)
         {
             theta = Theta[i][0];
             kt = 0.0;
             for (j=0;j<KT_SIZE;j++)
-                kt += K_T[j][0]*pow(*J[0],KT_SIZE-j-1.0);
+                kt += K_T[j][0]*pow(J_a,KT_SIZE-j-1.0);
         }
         else
         {
             theta = Theta[i][1];
             kt = 0.0;
             for (j=0;j<KT_SIZE;j++)
-                kt += K_T[j][1]*pow(*J[0],KT_SIZE-j-1.0);
+                kt += K_T[j][1]*pow(J_a,KT_SIZE-j-1.0);
         }
         // Compute the propulsors' force:
-        dw[i] = rho[i]*pow(prop_diam[i],4.)*fabs(*n[i])*(*n[i])*theta*kt;
+        rw[i] = rho[i]*pow(prop_diam[i],4.)*fabs(*n[i])*(*n[i])*theta*kt;
+    }
 }
 // ------------------------------------------------------------------------
         
@@ -206,12 +213,12 @@ static void mdlInitializeSizes(SimStruct *S)
   
     // Set input port widths:
     ssSetInputPortWidth(S, I_U, I_USIZE);
-    ssSetInputPortWidth(S, I_J, I_JSIZE);
+    ssSetInputPortWidth(S, I_V, I_VSIZE);
 
     // If you add new inputs, you must add an element to the list below to
     // indicate if the input is used directly to compute an output.  
     ssSetInputPortDirectFeedThrough(S, I_U, YES);
-    ssSetInputPortDirectFeedThrough(S, I_J, YES);
+    ssSetInputPortDirectFeedThrough(S, I_V, YES);
   
     // Specify number of output ports:
     if (!ssSetNumOutputPorts(S,O_N)) return; 
@@ -227,10 +234,6 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetNumPWork(S, 0);
     ssSetNumModes(S, 0);
     ssSetNumDWork(S, DW_N);
-    
-    // Set up the width and type of the dynamic work vectors:
-    ssSetDWorkWidth(S, DW_F, DW_FSIZE);
-    ssSetDWorkDataType(S, DW_F, SS_DOUBLE);
     
     // Debugging:
 //     int_T i,j;
@@ -288,8 +291,8 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     memcpy(T,T1D,O_TSIZE*I_USIZE*sizeof(real_T));
     // Compute the propulsors' force:
     propulsors_force(S);
-    // Set a pointer to the dynamic work vector for the propulsors' force:
-    real_T *dw = (real_T*) ssGetDWork(S,DW_F);
+    // Set a pointer to the real work vector:
+    real_T *rw = ssGetRWork(S);
     
     // Compute the thrust force:
     int_T i,j;   // counters
@@ -297,7 +300,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     for(i=0;i<O_TSIZE;i++)
         tmp = 0.0;
         for(j=0;j<I_USIZE;j++)
-            tmp += T[i][j]*dw[i];
+            tmp += T[i][j]*rw[j];
         yT[i] = tmp;
 }
 

@@ -16,8 +16,8 @@ rovSimSetup;
 
 % Initial conditions:
 ics = zeros(12,1);
-n = [0;0;0;0;0];
-tau = [0;0;0;0;0;0];
+n = [0;0;0;700;1000];
+%tau = [0;0;0;0;0;0];
 rov.weight = 4.92056575e+03;
 v_c = [0;0;0;0;0;0];      % current velocity
 mdl.tEnd = 20;
