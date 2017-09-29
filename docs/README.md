@@ -20,3 +20,24 @@ Before the software can be considered as fully functional, the following items a
 * Path planning methods in Matlab;
 * Guidance methods (target & trajectory tracking and path following) in Simulink/Matlab;
 * ROV control routines (dynamic positioning and path controller) in Simulink;
+
+# Theory
+
+## UUV dynamics
+
+The notation and equations introduced in Fossen (2011) have been used to program the UUV dynamics. However, the upward right-hand rule convention (north,west,up) is used instead of (north,east,down) at the moment.
+
+Let us define the motions in 6 degrees of freedom (DOF) as
+
+$$\eta$$
+
+
+
+### References
+T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
+
+### To-do list
+
+* convention
+* quaternions
+* Coriolis force
