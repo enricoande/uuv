@@ -1,4 +1,3 @@
-mathjax: true
 {% include mathjax.html %}
 
 Welcome to the wiki of the `uuv` project!
