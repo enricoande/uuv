@@ -37,13 +37,13 @@ $$ \mathbf{\nu} = \begin{bmatrix} u & v & w & p & q & r \end{bmatrix}^T .$$
 
 Additionally, it is possible to include the effects of an external current represented by the velocity vector $\mathbf{\nu}_\mathrm{c}$, whose 4<sup>th</sup> to 6<sup>th</sup> entries are zero for an irrotational current. The relative velocity vector in body-fixed coordinates is represented by
 
- \mathbf{\nu}_\mathrm{r} = \mathbf{\nu} - mathbf{\nu}_\mathrm{c}  . 
+ $$\mathbf{\nu}_\mathrm{r} = \mathbf{\nu} - mathbf{\nu}_\mathrm{c}  . $$
 
 Then, the dynamics of an UUV can be expressed by the following system of ordinary differential equations:
 
-\begin{bamtrix} \mathbf{\dot{\eta}} // \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bamtrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} // \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( \mathbf{f}_\mathrm{h} + \mathbf{f}_\mathrm{d} + \mathbf{f}_\mathrm{C} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,
+$$\begin{bamtrix} \mathbf{\dot{\eta}} // \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bamtrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} // \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( \mathbf{f}_\mathrm{h} + \mathbf{f}_\mathrm{d} + \mathbf{f}_\mathrm{C} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
 
-where \mathbf{J} is the transformation matrix for the generalized coordinates, \mathbf{M}_\mathrm{RB} the inertia matrix of the rigid body, \mathbf{M}_\mathrm{A} the added mass inertia matrix, \mathbf{f}_\mathrm{h} the hydrostating restoring force vector, \mathbf{f}_\mathrm{d} the damping force vector, \mathbf{f}_\mathrm{C} the Coriolis force vector, \mathbf{f}_\mathrm{e} the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and \mathbf{\tau} the thrust force vector.
+where $\mathbf{J}$ is the transformation matrix for the generalized coordinates, $\mathbf{M}_\mathrm{RB}$ the inertia matrix of the rigid body, $\mathbf{M}_\mathrm{A}$ the added mass inertia matrix, $\mathbf{f}_\mathrm{h}$ the hydrostating restoring force vector, $\mathbf{f}_\mathrm{d}$ the damping force vector, $\mathbf{f}_\mathrm{C}$ the Coriolis force vector, $\mathbf{f}_\mathrm{e}$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $\mathbf{\tau}$ the thrust force vector.
 
 ### References
 T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
