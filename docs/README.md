@@ -35,7 +35,7 @@ The notation and equations introduced in Fossen (2011) have been used to program
 
 Let us define the motions in 6 degrees of freedom (DOF) as
 
-\\] \eta \\]
+$$ \mathbf{\eta} = \begin{bmatrix} x & y & z & \phi & \theta & \psi \end{bmatrix}^T $$
 
 
 
