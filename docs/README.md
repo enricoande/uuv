@@ -33,7 +33,7 @@ $$\mathbf{\eta} = \begin{bmatrix} x & y & z & \phi & \theta & \psi \end{bmatrix}
 
 and the 6DOF velocity vector in the *body-fixed* reference frame as
 
-$$ \mathbf{\nu} = \begin{bmatrix} u & v & w & p & q & r \end{bmatrix}^T $$.
+$$ \mathbf{\nu} = \begin{bmatrix} u & v & w & p & q & r \end{bmatrix}^T .$$
 
 Additionally, it is possible to include the effects of an external current represented by the velocity vector $\mathbf{\nu}_\mathrm{c}$, whose 4<sup>th</sup> to 6<sup>th</sup> entries are zero for an irrotational current. The relative velocity vector in body-fixed coordinates is represented by
 
