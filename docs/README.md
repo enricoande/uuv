@@ -1,9 +1,3 @@
-<head>
-    <script type="text/javascript"
-            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-    </script>
-</head>
-
 Welcome to the wiki of the `uuv` project!
 
 Here you can find up-to-date information on the `uuv` repository.
