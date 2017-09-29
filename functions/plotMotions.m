@@ -21,11 +21,11 @@ set(l,'Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex')
 subplot(2,1,2);
-plot(t,rad2deg(states(:,4)),'--','Color',[0.4940,0.1840,0.5560]);
+plot(t,rad2deg(wrapToPi(states(:,4))),'--','Color',[0.4940,0.1840,0.5560]);
 hold on;
-plot(t,rad2deg(states(:,5)),'-.','Color',[0.4660,0.6740,0.1880]);
+plot(t,rad2deg(wrapToPi(states(:,5))),'-.','Color',[0.4660,0.6740,0.1880]);
 hold on;
-plot(t,rad2deg(states(:,6)),'-','Color',[0.3010,0.7450,0.9330]);
+plot(t,rad2deg(wrapToPi(states(:,6))),'-','Color',[0.3010,0.7450,0.9330]);
 hold off;
 xlabel('Time (s)','Interpreter','Latex');
 ylabel('Rotation ($^\circ$)','Interpreter','Latex');

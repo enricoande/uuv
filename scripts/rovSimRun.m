@@ -15,12 +15,13 @@ close all;
 rovSimSetup;
 
 % Initial conditions:
-ics = zeros(12,1);
-n = [0;0;0;700;1000];
-%tau = [0;0;0;0;0;0];
-rov.weight = 4.92056575e+03;
-v_c = [0;0;0;0;0;0];      % current velocity
-mdl.tEnd = 20;
+ics = zeros(12,1);        % initial conditions (m & rad)
+n = [0;0;0;700;1000];     % thrusters' rpm
+n = n/60;                 % thrusters' rps
+%tau = [0;0;0;0;0;0];     % thrusters' thrust (N)
+rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
+v_c = [0;0;0;0;0;0];      % current velocity (m/s)
+mdl.tEnd = 20;            % simulation duration (s)
 
 tic;
 %% Load the Simulink file:
@@ -33,7 +34,7 @@ load_system(sfile);
 sout = sim(sfile,'StopTime',num2str(mdl.tEnd));
 
 %% Close the Simulink file:
-close_system(sfile);
+% close_system(sfile);
 toc;
 
 %% Post-processing:

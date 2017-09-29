@@ -54,16 +54,16 @@
 #define IW_N   0 // size of integer work vector
 
 // Input indices:
-#define I_U    0       // control input: no. prop. revs
-#define   I_USIZE  5   // size of input port
-#define I_V   1        // propellers speed in water
-#define   I_VSIZE  1   // size of input port
-#define I_N    2       // # of input ports
+#define I_U    0        // control input: no. prop. revs
+#define   I_USIZE  RW_N // size of input port
+#define I_V   1         // propellers speed in water
+#define   I_VSIZE  1    // size of input port
+#define I_N    2        // # of input ports
 
 // Output indices:
-#define O_T   0        // thrust vector
-#define   O_TSIZE  6   // size of output port
-#define O_N    1       // # of output ports
+#define O_T   0         // thrust vector
+#define   O_TSIZE  6    // size of output port (6 DOF)
+#define O_N    1        // # of output ports
 
 // ---------------------  Support Functions  ------------------------------
 // ************************************************************************
@@ -117,7 +117,7 @@ void propulsors_force(SimStruct *S)
                 kt += K_T[j][1]*pow(J_a,KT_SIZE-j-1.0);
         }
         // Compute the propulsors' force:
-        rw[i] = rho[i]*pow(prop_diam[i],4.)*fabs(*n[i])*(*n[i])*theta*kt;
+        rw[i] = rho[0]*pow(prop_diam[i],4.)*fabs(*n[i])*(*n[i])*theta*kt;
     }
 }
 // ------------------------------------------------------------------------
@@ -297,11 +297,18 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     // Compute the thrust force:
     int_T i,j;   // counters
     real_T tmp;  // temporary variable
+//     // Debugging:
+//     for(j=0;j<I_USIZE;j++)
+//         printf("%f \t",rw[j]);
+//     printf("\n");
+    //
     for(i=0;i<O_TSIZE;i++)
+    {
         tmp = 0.0;
         for(j=0;j<I_USIZE;j++)
             tmp += T[i][j]*rw[j];
         yT[i] = tmp;
+    }    
 }
 
 // ************************************************************************
