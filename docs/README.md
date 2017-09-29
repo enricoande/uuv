@@ -1,3 +1,5 @@
+{% include mathjax.html %}
+
 Welcome to the wiki of the `uuv` project!
 
 Here you can find up-to-date information on the `uuv` repository.
