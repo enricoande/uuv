@@ -1,3 +1,9 @@
+<head>
+    <script type="text/javascript"
+            src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+</head>
+
 Welcome to the wiki of the `uuv` project!
 
 Here you can find up-to-date information on the `uuv` repository.
@@ -6,7 +12,7 @@ First of all, the repository contains software that is used to simulate and cont
 
 # Current status
 
-The code is still not fully functional. At the moment, the following items have been implemented:
+The code is not fully functional yet. At the moment, the following items have been implemented:
 * Directory in recommended Matlab/Simulink project format;
 * ROV 6DOF dynamics block in Simulink (C S-function), including added mass, damping and hydrostatic forces;
 * An external current (Matlab/Simulink);
