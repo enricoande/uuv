@@ -27,7 +27,7 @@ Before the software can be considered as fully functional, the following items a
 
 The Minerva ROV is in use at NTNU and well documented in the literature (especially in M.Sc. and Ph.D. theses from NTNU).
 
-More information on the ROV can be found here [https://www.ntnu.edu/oceans/minerva].
+More information on the ROV can be found here https://www.ntnu.edu/oceans/minerva.
 
 The dynamics coefficients and fits are taken from Mo (2015).
 
