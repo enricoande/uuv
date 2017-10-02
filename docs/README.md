@@ -21,6 +21,20 @@ Before the software can be considered as fully functional, the following items a
 * Guidance methods (target & trajectory tracking and path following) in Simulink/Matlab;
 * ROV control routines (dynamic positioning and path controller) in Simulink;
 
+# Supported UUVs
+
+## ROV Minerva
+
+The Minerva ROV is in use at NTNU and well documented in the literature (especially in M.Sc. and Ph.D. theses from NTNU).
+
+More information on the ROV can be found here https://www.ntnu.edu/oceans/minerva.
+
+The dynamics coefficients and fits are taken from Mo (2015).
+
+## References
+
+S. M. Mo (2015). _Development of a Simulation Platform for ROV Systems_. Norwegian University of Science and Technology (NTNU), M.Sc. thesis.
+
 # Theory
 
 ## UUV dynamics
