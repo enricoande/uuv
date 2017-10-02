@@ -14,7 +14,7 @@
 //
 // Version : 1.0
 
-#define S_FUNCTION_NAME rov_dynamics
+#define S_FUNCTION_NAME uuv_dynamics
 #define S_FUNCTION_LEVEL 2
 
 #include "simstruc.h"

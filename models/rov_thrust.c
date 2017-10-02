@@ -12,7 +12,7 @@
 //
 // Version : 1.0
 
-#define S_FUNCTION_NAME thrust
+#define S_FUNCTION_NAME rov_thrust
 #define S_FUNCTION_LEVEL 2
 
 #include "simstruc.h"
