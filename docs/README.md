@@ -53,7 +53,14 @@ The damping force vector is represented by a linear and a quadratic term:
 $$ \mathbf{f}_\mathrm{d} = \mathbf{D}_\mathrm{l} \mathbf{\nu}_\mathrm{r} + \mathbf{D}_\mathrm{q} \mathrm{diag}\left( | \mathbf{\nu}_\mathrm{r} |\right) \mathbf{\nu}_\mathrm{r} , $$
 where $\mathbf{D}_\mathrm{l}$ and $\mathbf{D}_\mathrm{q}$ are the linear and quadratic damping matrices, respectively.
 
-
+The $(6\times 1)$ thrust force vector is obtained as
+$$ \mathbf{\tau} = \mathbf{T} \mathbf{f}_\mathrm{th}, $$
+where $\mathbf{T}$ is the thrust allocation matrix and $\mathbf{f}_\mathrm{th}$ is the thrust force vector that has an entry for every thruster. Hence, the thrust allocation matrix expresses the contribution of each motor in each degree of freedom in the body-fixed coordinate system. Therefore, the thrust allocation matrix is constant if the motors do not rotate.
+The thrust force vector is calculated as
+$$ \mathbf{f}_\mathrm{th} = \rho \mathbf{D}^4 \odot \mathrm{K}_\mathrm{T} \odot | \mathbf{n} | \odot \mathbf{n} \odot \mathbf{\theta} $$
+where all vectors have the length equal to the number of propulsors and $\odot$ indicates element-wise multiplication. $\mathbf{D}$ is the vector of diameters, $\mathbf{\theta}$ is the thrust loss coefficient vector, $\mathbf{n}$ is the propulsors' rotational velocity, which is output by the controller, and $\mathbf{K}_\mathrm{T}$ is the thrust coefficient vector, which is a function of the advance ratio vector
+$$ \mathbf{J}_\mathrm{a} = \frac{\mathbf{\nu}_\mathrm{a}}{\mathbf{n}\mathbf{D}}, $$
+where $\mathbf{\nu}_\mathrm{a}$ is the vector of tehe velocity of the propellers through the water.
 
 ### References
 T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
