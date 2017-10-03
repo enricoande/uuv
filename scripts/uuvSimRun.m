@@ -52,5 +52,5 @@ plotMotions(t,x);
 plotForces(t,f);
 % % Plot the UUV's path:
 % plotPath(t,x);
-% % Animate the UUV's motion:
-% animateAUV(t,x,50,0.2);
+% Animate the UUV's motion:
+animateAUV(t,x,50,1,4);

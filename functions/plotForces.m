@@ -44,6 +44,7 @@ l = legend('thrust','restoring','damping','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
+set(gcf,'color','w');
 
 %% Moments:
 figure;
@@ -84,5 +85,6 @@ l = legend('thrust','restoring','damping','Location','Best');
 set(l,'Interpreter','Latex');
 grid on;
 set(gca,'TickLabelInterpreter','Latex');
+set(gcf,'color','w');
 
 end

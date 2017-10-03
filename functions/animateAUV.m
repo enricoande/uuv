@@ -1,7 +1,14 @@
-function animateAUV(t,x,nframes,l)
+function animateAUV(t,x,nframes,l,fspeed)
 % animateAUV.m     e.anderlini@ucl.ac.uk     15/09/2017
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % This function is used to plot the path of the ROV.
+%
+% Input:
+% t:        time series vector;
+% x:        states matrix;
+% nframes:  no. frames per animation step;
+% l:        length of the arms of the moving triad;
+% fspeed:   speed of the time frame - be careful, select even number.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Keep only the desired frames for the animation:
@@ -20,7 +27,11 @@ for i=1:n
         p(i,:,j) = x_anim(i,1:3)+rotation(x_anim(i,4:6),arm(:,j))';
     end
 end
-dt = t_anim(2)-t_anim(1);
+% Compute the time step of the animation:
+dt = (t_anim(2)-t_anim(1))/fspeed;
+% Invert the z-axis to make animation more intuitive:
+p(:,3,:) = -p(:,3,:);
+x_anim(:,3) = -x_anim(:,3);
 
 %% Animate the triad's motion:
 figure;
@@ -29,7 +40,6 @@ figure;
 xlabel('$x$ (m)','Interpreter','Latex');
 ylabel('$y$ (m)','Interpreter','Latex');
 zlabel('$z$ (m)','Interpreter','Latex');
-grid on;
 set(gca,'TickLabelInterpreter','Latex')
 set(gcf,'color','w');
 for i=1:n
@@ -59,6 +69,7 @@ for i=1:n
 %     scatter3(p(i,1,3),p(i,2,3),p(i,3,3),'filled',...
 %         'MarkerFaceColor',[0.4660,0.6740,0.1880]);
     hold off;
+    daspect([1 1 1]);
     pause(dt);
 end
 
