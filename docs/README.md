@@ -1,3 +1,7 @@
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?...">
+</script>
+
 Welcome to the wiki of the `uuv` project!
 
 Here you can find up-to-date information on the `uuv` repository.
