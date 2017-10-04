@@ -22,7 +22,7 @@ set(gca,'TickLabelInterpreter','Latex');
 subplot(3,1,2);
 plot(t,f(:,2),'--');
 hold on;
-plot(t,f(:,3),'-.');
+plot(t,f(:,8),'-.');
 hold on;
 plot(t,f(:,14),'-');
 hold off;

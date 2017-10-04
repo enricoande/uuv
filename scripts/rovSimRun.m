@@ -16,12 +16,35 @@ rovSimSetup;
 
 % Initial conditions:
 ics = zeros(12,1);        % initial conditions (m & rad)
-n = [0;0;0;700;1000];     % thrusters' rpm
-n = n/60;                 % thrusters' rps
+% n = [0;0;0;700;1000];     % thrusters' rpm
+% n = n/60;                 % thrusters' rps
 %tau = [0;0;0;0;0;0];     % thrusters' thrust (N)
+% n = [9.45819121127617e-34,0.167118230400000,6.93889390390723e-18,0,-1.82097359527443e-33];
 rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
 v_c = [0;0;0;0;0;0];      % current velocity (m/s)
-mdl.tEnd = 20;            % simulation duration (s)
+
+% Pre-processing:
+Tinv = pinv(rov.T);       % inverse of the thrust allocation matrix
+n_max = 1200/60;          % max. thrusters' rotational speed (rps)
+
+%% PID controller gains:
+% You will need to obtain the gains by trial and error. Look at the
+% following sections one by one to prevent problems.
+% Depth: - PID controller
+zd = 0;                    % desired depth (m)
+kpd = 100;                 % proportional gain               
+kid = 15;                  % integral gain
+kdd = 30;                  % derivative gain
+% Speed: - PID controller
+ud = 0;                    % desired speed (m/s)
+kpu = 100;                 % proportional gain
+kdu = 10;                  % integral gain
+kiu = 20;                  % derivative gain
+% Heading: - PID controller
+psid = 0;                  % desired heading (rad)
+kppsi = 100;               % proportional gain
+kdpsi = 10;                % integral gain
+kipsi = 20;                % derivative gain
 
 tic;
 %% Load the Simulink file:
@@ -45,9 +68,9 @@ f = [sout.get('logsout').getElement('thrust').Values.Data,...
     sout.get('logsout').getElement('forces').Values.Data];
 % Plot the ROV's motions:
 plotMotions(t,x);
-% Plot the ROV's forces:
-plotForces(t,f);
+% % Plot the ROV's forces:
+% plotForces(t,f);
 % % Plot the ROV's path:
 % plotPath(t,x);
 % % Animate the ROV's motion:
-% animateAUV(t,x,50,0.2);
+% animateAUV(t,x,50,1,4);
