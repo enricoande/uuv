@@ -19,9 +19,8 @@ ics = zeros(12,1);        % initial conditions (m & rad)
 % n = [0;0;0;700;1000];     % thrusters' rpm
 % n = n/60;                 % thrusters' rps
 %tau = [0;0;0;0;0;0];     % thrusters' thrust (N)
-% n = [9.45819121127617e-34,0.167118230400000,6.93889390390723e-18,0,-1.82097359527443e-33];
 rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
-v_c = [0;0;0;0;0;0];      % current velocity (m/s)
+v_c = [0.2;0;0;0;0;0];      % current velocity (m/s)
 
 % Pre-processing:
 Tinv = pinv(rov.T);       % inverse of the thrust allocation matrix
@@ -42,7 +41,7 @@ kdu = 10;                  % integral gain
 kiu = 20;                  % derivative gain
 % Heading: - PID controller
 psid = 0;                  % desired heading (rad)
-kppsi = 100;               % proportional gain
+kppsi = 80;                % proportional gain
 kdpsi = 10;                % integral gain
 kipsi = 20;                % derivative gain
 

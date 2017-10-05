@@ -1,4 +1,4 @@
-// 6 D.o.F. dynamics of a ROV
+// 6 D.o.F. dynamics of an UUV
 // excluding thrust, tether & environmental effects
 // Modelled effects: hydrostatic, damping, Coriolis, added mass
 //
@@ -12,7 +12,10 @@
 //
 // Created : 13 September 2017
 //
-// Version : 1.0
+// Version : 1.1
+// Modifications:
+// 05/10/2017   The block has been modified to compute the current velocity
+//              in the body-fixed reference frame.
 
 #define S_FUNCTION_NAME uuv_dynamics
 #define S_FUNCTION_LEVEL 2
@@ -80,7 +83,9 @@
 #define     DW_RTSIZE 9
 #define DW_D   3 // damping force vector
 #define     DW_DSIZE  6
-#define DW_N   4 // size of dynamic work vector
+#define DW_VR  4 // relative velocity vector
+#define     DW_VRSIZE 6
+#define DW_N   5 // size of dynamic work vector
         
 // integer work vector indices
 #define IW_N   0 // size of integer work vector
@@ -88,20 +93,22 @@
 // input indices
 #define I_T    0       // thurst vector
 #define   I_TSIZE   6  // size of input port
-#define I_VR   1       // relative velocity vector
-#define   I_VRSIZE  6  // size of input port
+#define I_VC   1       // current velocity vector
+#define   I_VCSIZE  6  // size of input port
 #define I_N    2       // # of input ports
 
 // output indices
 #define O_ST   0         // state output port #
 #define   O_STSIZE C_N   // states (m and m/s)
 #define O_F    1
-#define   O_FSIZE  12    // restoring, & damping forces
-#define O_N    2         // # of output ports
+#define   O_FSIZE  12    // restoring, & damping forces (x4)
+#define O_VR   2
+#define   O_VRSIZE  6    // relative velocity (m/s)
+#define O_N    3         // # of output ports
 
 // ---------------------  Support Functions  ------------------------------
 // ************************************************************************
-//  restoring_force: Function that returns the restoring force on the ROV.
+// restoring_force: Function that returns the restoring force on the ROV.
 // N.B.: For greater efficiency, a dynamic work vector is used.
 // ************************************************************************
 void restoring_force(SimStruct *S)
@@ -129,15 +136,15 @@ void restoring_force(SimStruct *S)
 }
 
 // ************************************************************************
-//  damping_force: Function that returns the damping force on the ROV.
+// damping_force: Function that returns the damping force on the ROV.
 // N.B.: For greater efficiency, a dynamic work vector is used.
 // ************************************************************************
 void damping_force(SimStruct *S)
 {
     // Set a pointer to the dynamic work vector for the damping force:
     real_T *dw = (real_T*) ssGetDWork(S,DW_D);
-    // Set a pointer to the relative velocity input:
-    InputRealPtrsType vr = ssGetInputPortRealSignalPtrs(S,I_VR);
+    // Set a pointer to the dynamic work vector for the relative velocity:
+    real_T *vr = (real_T*) ssGetDWork(S,DW_VR);
     // Snatch and map the linear damping matrix:
     const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
     real_T D_L[6][6];
@@ -152,13 +159,13 @@ void damping_force(SimStruct *S)
     // Compute the damping force: 
     for(i=0;i<DW_DSIZE;i++)
     {
-        dw[i] = D_L[i][i]* *vr[i] + D_Q[i][i]*fabs(*vr[i])* *vr[i];
+        dw[i] = D_L[i][i]*vr[i] + D_Q[i][i]*fabs(vr[i])*vr[i];
     }
     // N.B.: This relies on the assumption of diagonal damping matrices.
 }
 
 // ************************************************************************
-//  transformation_matrix: Function that returns the transformation matrix.
+// transformation_matrix: Function that returns the transformation matrix.
 // N.B.: For greater efficiency, a dynamic work vector is used.
 // ************************************************************************
 void transformation_matrix(SimStruct *S)
@@ -184,7 +191,7 @@ void transformation_matrix(SimStruct *S)
     dw_tt[7] = cos(x[C_TH])*sin(x[C_PH]);
     dw_tt[8] = cos(x[C_TH])*cos(x[C_PH]);
     
-    // Compute the rotational transformation matrix: 
+    // Compute the rotational velocity transformation matrix: 
     dw_rt[0] = 1.0;
     dw_rt[1] = sin(x[C_PH])*tan(x[C_TH]);
     dw_rt[2] = cos(x[C_PH])*tan(x[C_TH]);
@@ -194,6 +201,47 @@ void transformation_matrix(SimStruct *S)
     dw_rt[6] = 0.0;
     dw_rt[7] = sin(x[C_PH])/cos(x[C_TH]);
     dw_rt[8] = cos(x[C_PH])/cos(x[C_TH]);
+}
+
+// ************************************************************************
+// relative_velocity: Function that returns the relative velocity vector.
+// The orthonormality of the transformation matrices is exploited.
+// N.B.: For greater efficiency, a dynamic work vector is used.
+// ************************************************************************
+void relative_velocity(SimStruct *S)
+{
+    int_T i,j,k;   // counters
+    real_T tmp;    // temporary variable
+    // Set a pointer to the desired dynamic work vectors:
+    real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
+    real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
+    real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
+    // Set a pointer to the current velocity vector:
+    InputRealPtrsType vc = ssGetInputPortRealSignalPtrs(S,I_VC);
+    // Set a pointer to the continuous state vector:
+    real_T *x  = ssGetContStates(S);
+    
+    // Compute the current velocity in the body-fixed reference frame:
+    for(i=0;i<3;i++)
+    {
+        tmp = 0;
+        for(j=0;j<3;j++)
+        {
+            k = i + 3 * j;
+            tmp += dw_tt[k] * (*vc[j]);
+        }
+        dw_vr[i] = x[i+6]-tmp;
+    }
+    for(i=0;i<3;i++)
+    {
+        tmp = 0;
+        for(j=0;j<3;j++)
+        {
+            k = i + 3 * j;
+            tmp += dw_tt[k] * (*vc[j+3]);
+        }
+        dw_vr[i+3] = x[i+9]-tmp;
+    }
 }
 // ------------------------------------------------------------------------
         
@@ -322,19 +370,20 @@ static void mdlInitializeSizes(SimStruct *S)
   
     // Set input port widths:
     ssSetInputPortWidth(S, I_T, I_TSIZE);
-    ssSetInputPortWidth(S, I_VR, I_VRSIZE);
+    ssSetInputPortWidth(S, I_VC, I_VCSIZE);
 
     // If you add new inputs, you must add an element to the list below to
     // indicate if the input is used directly to compute an output.  
     ssSetInputPortDirectFeedThrough(S, I_T, NO);
-    ssSetInputPortDirectFeedThrough(S, I_VR, NO);
+    ssSetInputPortDirectFeedThrough(S, I_VC, NO);
   
     // Specify number of output ports:
     if (!ssSetNumOutputPorts(S,O_N)) return; 
 
     // Specify output port widths:
     ssSetOutputPortWidth(S, O_ST , O_STSIZE);
-    ssSetOutputPortWidth(S, O_F , O_FSIZE); 
+    ssSetOutputPortWidth(S, O_F , O_FSIZE);
+    ssSetOutputPortWidth(S, O_VR , O_VRSIZE);
 
     // Set up work vectors:
     // If you need several arrays or 2D arrays of work vectors, then use
@@ -350,10 +399,12 @@ static void mdlInitializeSizes(SimStruct *S)
     ssSetDWorkWidth(S, DW_TT, DW_TTSIZE);
     ssSetDWorkWidth(S, DW_RT, DW_RTSIZE);
     ssSetDWorkWidth(S, DW_D, DW_DSIZE);
+    ssSetDWorkWidth(S, DW_VR, DW_VRSIZE);
     ssSetDWorkDataType(S, DW_R, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_TT, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_RT, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_D, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_VR, SS_DOUBLE);
 
     // Set up sample times:
     ssSetNumSampleTimes(  S, 1);
@@ -391,6 +442,7 @@ static void mdlInitializeConditions(SimStruct *S)
     real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
     real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
     real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
+    real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
 
     // Initialize counter variables:
     int i,j;
@@ -422,6 +474,10 @@ static void mdlInitializeConditions(SimStruct *S)
     {
         dw_tt[i] = 0.0;
         dw_rt[i] = 0.0;
+    }
+    for (i=0;i<DW_VRSIZE;i++)
+    {
+        dw_vr[i] = 0.0;
     }
   
     // Debugging:
@@ -461,21 +517,26 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     // set a pointers to the outputs
     real_T *ySt   = ssGetOutputPortSignal(S,O_ST);  // states
     real_T *yF    = ssGetOutputPortSignal(S,O_F);   // forces
-  
+    real_T *yVr   = ssGetOutputPortSignal(S,O_VR);  // relative velocity
+    
     // set a pointer to the continous state vector
     real_T *x  = ssGetContStates(S);
   
     // Set a pointer to the dynamic work vectors:
     real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
     real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
+    real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
   
     // Toss continuous states to the output port:
     int_T i;   // counter
     for(i=0;i<O_STSIZE;i++) ySt[i] = x[i];
     
-    // Output the forces acting on the ROV:
+    // Output the forces acting on the UUV:
     for(i=0;i<DW_RSIZE;i++) yF[i] = dw_r[i];
     for(i=0;i<DW_DSIZE;i++) yF[i+DW_RSIZE] = dw_d[i];
+    
+    // Output the relative velocity vector:
+    for(i=0;i<DW_VRSIZE;i++) yVr[i] = dw_vr[i];
 }
 
 // ************************************************************************
@@ -493,14 +554,22 @@ static void mdlUpdate(SimStruct *S, int_T tid){}
 #if defined(MDL_DERIVATIVES)
 static void mdlDerivatives(SimStruct *S)
 {
-  real_T *x  = ssGetContStates(S); // ptr to continous states
+  int_T i,j,k;   // counters
+  real_T tmp;    // temporary value
+  
   real_T *dx = ssGetdX(S);         // ptr to right side of x' = f(x,u,t)
   
   // Set a pointer to the thrust vector:
   InputRealPtrsType thrust = ssGetInputPortRealSignalPtrs(S,I_T);
   
-  int_T i,j,k;   // counters
-  real_T tmp;    // temporary value
+  // Compute the transformation matrix:
+  transformation_matrix(S);
+  real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
+  real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
+  
+  // Compute the relative velocity:
+  relative_velocity(S);
+  real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
   
   // Snatch and map the inverse mass matrix: 
   const real_T *M1D = mxGetPr(ssGetSFcnParam(S,P_M));
@@ -525,17 +594,12 @@ static void mdlDerivatives(SimStruct *S)
   damping_force(S);
   real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
   
-  // Compute the transformation matrix:
-  transformation_matrix(S);
-  real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
-  real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
-  
   // Compute the state derivatives:
   k = 0;
   for (i=0;i<3;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_tt[k]*x[j+6];
+          tmp += dw_tt[k]*dw_vr[j];
           k++;
       }
       dx[i] = tmp;
@@ -544,7 +608,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=3;i<6;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_rt[k]*x[j+9];
+          tmp += dw_rt[k]*dw_vr[j+3];
           k++;
       }
       dx[i] = tmp;
