@@ -44,9 +44,11 @@
 #define P_CB  3  // centre of buoyancy (m)
 #define P_IC  4  // initial conditions
 #define P_M   5  // inverse of the mass matrix
-#define P_DL  6  // rigid body linear damping matrix
-#define P_DQ  7  // rigid body quadratic damping matrix
-#define P_N   8  // number of elements in input
+#define P_MA  6  // added mass matrix
+#define P_MB  7  // rigid body mass matrix
+#define P_DL  8  // rigid body linear damping matrix
+#define P_DQ  9  // rigid body quadratic damping matrix
+#define P_N  10  // number of elements in input
    
 // continuous state indices
 #define C_X   0  // (m)
@@ -76,16 +78,18 @@
         
 // dynamic work vector indices
 #define DW_R   0 // restoring force vector
-#define     DW_RSIZE  6        
-#define DW_TT  1 // translational transformation matrix
-#define     DW_TTSIZE 9 
-#define DW_RT  2 // rotational transformation matrix
-#define     DW_RTSIZE 9
-#define DW_D   3 // damping force vector
+#define     DW_RSIZE  6
+#define DW_D   1 // damping force vector
 #define     DW_DSIZE  6
-#define DW_VR  4 // relative velocity vector
+#define DW_C   2 // Coriolis force vector
+#define     DW_CSIZE  6
+#define DW_TT  3 // translational transformation matrix
+#define     DW_TTSIZE 9 
+#define DW_RT  4 // rotational transformation matrix
+#define     DW_RTSIZE 9
+#define DW_VR  5 // relative velocity vector
 #define     DW_VRSIZE 6
-#define DW_N   5 // size of dynamic work vector
+#define DW_N   6 // size of dynamic work vector
         
 // integer work vector indices
 #define IW_N   0 // size of integer work vector
@@ -101,14 +105,38 @@
 #define O_ST   0         // state output port #
 #define   O_STSIZE C_N   // states (m and m/s)
 #define O_F    1
-#define   O_FSIZE  12    // restoring, & damping forces (x4)
+#define   O_FSIZE  18    // restoring, damping & Coriolis forces (x6)
 #define O_VR   2
 #define   O_VRSIZE  6    // relative velocity (m/s)
 #define O_N    3         // # of output ports
 
 // ---------------------  Support Functions  ------------------------------
 // ************************************************************************
-// restoring_force: Function that returns the restoring force on the ROV.
+// skew_symmetric: Function that returns the skew symmetric matrix of the
+// given vector. Note that the vector must be of size (3,1) and the matrix
+// is of size (3,3). The matrix will in fact be returned in vectorized 
+// form.
+// Input:
+// S: skew symmetric matrix (pre-allocated memory will be filled);
+// v: (3,1) vector;
+// i: pointer to start of vector of interest.
+// ************************************************************************
+void skew_symmetric(real_T *S, const real_T *v, const int_T i)
+{
+    // Return the vectorized skew symmetric matrix:
+    S[0] = 0.0;
+    S[1] = -v[2+i];
+    S[2] = v[1+i];
+    S[3] = v[2+i];
+    S[4] = 0.0;
+    S[5] = -v[0+i];
+    S[6] = -v[1+i];
+    S[7] = v[0+i];
+    S[8] = 0.0;
+}
+
+// ************************************************************************
+// restoring_force: Function that returns the restoring force on the UUV.
 // N.B.: For greater efficiency, a dynamic work vector is used.
 // ************************************************************************
 void restoring_force(SimStruct *S)
@@ -136,7 +164,7 @@ void restoring_force(SimStruct *S)
 }
 
 // ************************************************************************
-// damping_force: Function that returns the damping force on the ROV.
+// damping_force: Function that returns the damping force on the UUV.
 // N.B.: For greater efficiency, a dynamic work vector is used.
 // ************************************************************************
 void damping_force(SimStruct *S)
@@ -162,6 +190,98 @@ void damping_force(SimStruct *S)
         dw[i] = D_L[i][i]*vr[i] + D_Q[i][i]*fabs(vr[i])*vr[i];
     }
     // N.B.: This relies on the assumption of diagonal damping matrices.
+}
+
+// ************************************************************************
+// coriolis_force: Function that returns the Coriolis force on the UUV.
+// N.B.: For greater efficiency, a dynamic work vector is used.
+// ************************************************************************
+void coriolis_force(SimStruct *S)
+{
+    // Set a pointer to the dynamic work vector for the Coriolis force:
+    real_T *dw = (real_T*) ssGetDWork(S,DW_C);
+    // Set a pointer to the dynamic work vector for the relative velocity:
+    real_T *vr = (real_T*) ssGetDWork(S,DW_VR);
+    // Set a pointer to the continuous state vector:
+    real_T *x  = ssGetContStates(S);
+    
+    // Snatch and map the added mass matrix:
+    const real_T *MA1D = mxGetPr(ssGetSFcnParam(S,P_MA));
+    real_T M_A[6][6];
+    memcpy(M_A,MA1D,6*6*sizeof(real_T));
+    // Snatch and map the rigid body mass matrix:
+    const real_T *MB1D = mxGetPr(ssGetSFcnParam(S,P_MB));
+    real_T M_B[6][6];
+    memcpy(M_B,MB1D,6*6*sizeof(real_T));
+    // Set a pointer to the real work vector:
+    real_T *rw = ssGetRWork(S);
+    // Define required variables:
+    int_T i,j,k;          // counters
+    real_T Av[3], Sav1[9], Sav2[9], CA[6][6];
+    real_T m, Sv1[9], Sv2[9], SG[9], Iv[3], SIv[9], SGv[3][3], SvG[3][3];
+    real_T CRB[6][6];
+    
+    // Compute M_A*v_r: 
+    for(i=0;i<6;i++) {
+        Av[i] = 0.0;
+        for(j=0;j<6;j++) {
+            Av[i] += M_A[i][j]*vr[j]; } }
+    // Compute the skew symmetric matrices:
+    skew_symmetric(Sav1,Av,0);
+    skew_symmetric(Sav2,Av,3);
+    // Assemble C_A:
+    k = 0;
+    for(i=0;i<3;i++) {
+        for(j=0;j<3;j++) {
+            CA[i][j] = 0.0;
+            CA[i][j+3] = -Sav1[k];
+            k++; } }
+    k = 0;
+    for(i=3;i<6;i++) {
+        for(j=0;j<3;j++) {
+            CA[i][j] = -Sav1[k];
+            CA[i][j+3] = -Sav2[k];
+            k++; } }
+    
+    // Store m for simplicity:
+    m = M_B[0][0];
+    // Compute Ib * v2:
+    for(i=0;i<3;i++) {
+        Iv[i] = 0.0;
+        for(j=0;j<3;j++) {
+            Iv[i] += M_B[i+3][j+3]*x[j+9]; } }
+    // Compute the required skew symmetric matrices:
+    skew_symmetric(Sv1,x,6);
+    skew_symmetric(Sv2,x,9);
+    skew_symmetric(SG,rw,RW_XG);
+    skew_symmetric(SIv,Iv,0);
+    // Compute S(v2)*S(G) & S(G)*S(v2):
+    for(i=0;i<3;i++) {
+        for(j=0;j<3;j++) {
+            SvG[i][j] = 0.0;
+            SGv[i][j] = 0.0;
+            for(k=0;k<3;k++) {
+                SvG[i][j] += Sv2[i*3+k]*SG[k*i+j];
+                SGv[i][j] += SG[i*3+k]*Sv2[k*i+j]; } } }
+    // Assemble C_RB:
+    k = 0;
+    for(i=0;i<3;i++) {
+        for(j=0;j<3;j++) {
+            CRB[i][j] = 0.0;
+            CRB[i][j+3] = -m*Sv1[k] -m*SvG[i][j];
+            k++; } }
+    k = 0;
+    for(i=3;i<6;i++) {
+        for(j=0;j<3;j++) {
+            CRB[i][j] = -m*Sv1[k] +m*SGv[i][j];
+            CRB[i][j+3] = -SIv[k];
+            k++; } }
+    
+    // Calculate the Coriolis and centripetal force:
+    for(i=0;i<DW_CSIZE;i++) {
+        dw[i]=0.0;
+        for(j=0;j<DW_CSIZE;j++) {
+            dw[i] += CA[i][j]*vr[j]+CRB[i][j]*x[j+6]; } }
 }
 
 // ************************************************************************
@@ -301,19 +421,35 @@ static void mdlCheckParameters(SimStruct *S)
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
-// Check 7th parameter: P_DL
+// Check 7th parameter: P_MA
     {
-    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DL)) != 6*6 || 
-            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DL)) ) {
-        ssSetErrorStatus(S,"7th parameter, P_DL, to S-function "
+    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_MA)) != 6*6 || 
+            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_MA)) ) {
+        ssSetErrorStatus(S,"7th parameter, P_MA, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
-// Check 8th parameter: P_DQ
+// Check 8th parameter: P_MB
+    {
+    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_MB)) != 6*6 || 
+            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_MB)) ) {
+        ssSetErrorStatus(S,"8th parameter, P_MB, to S-function "
+                       "\"Response Parameters\" are not dimensioned "
+                       "correctly or of type double");
+      return; } }
+// Check 9th parameter: P_DL
+    {
+    if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DL)) != 6*6 || 
+            !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DL)) ) {
+        ssSetErrorStatus(S,"9th parameter, P_DL, to S-function "
+                       "\"Response Parameters\" are not dimensioned "
+                       "correctly or of type double");
+      return; } }
+// Check 10th parameter: P_DQ
     {
     if (mxGetNumberOfElements(ssGetSFcnParam(S,P_DQ)) != 6*6 || 
             !IS_PARAM_DOUBLE(ssGetSFcnParam(S,P_DQ)) ) {
-        ssSetErrorStatus(S,"8th parameter, P_DQ, to S-function "
+        ssSetErrorStatus(S,"10th parameter, P_DQ, to S-function "
                        "\"Response Parameters\" are not dimensioned "
                        "correctly or of type double");
       return; } }
@@ -335,9 +471,11 @@ static void mdlInitializeSizes(SimStruct *S)
     //   2. Centre of gravity                            m         3
     //   3. Centre of buoyancy                           m         3
     //   4. Initial conditions                          mix       12
-    //   5. Inverse of the mass matrix                  mix       36
-    //   6. Rigid body linear damping matrix            mix       36
-    //   7. Rigid body quadratic damping matrix         mix       36
+    //   5. Inverse of the mass matrix                kg^(-1)     36
+    //   6. Added mass matrix                            kg       36
+    //   7. Rigid body mass matrix                       kg       36
+    //   8. Rigid body linear damping matrix            mix       36
+    //   9. Rigid body quadratic damping matrix         mix       36
 
     ssSetNumSFcnParams(S, P_N); // total number of parameters
   
@@ -396,14 +534,16 @@ static void mdlInitializeSizes(SimStruct *S)
 
     // Set up the width and type of the dynamic work vectors:
     ssSetDWorkWidth(S, DW_R, DW_RSIZE);
+    ssSetDWorkWidth(S, DW_D, DW_DSIZE);
+    ssSetDWorkWidth(S, DW_C, DW_CSIZE);
     ssSetDWorkWidth(S, DW_TT, DW_TTSIZE);
     ssSetDWorkWidth(S, DW_RT, DW_RTSIZE);
-    ssSetDWorkWidth(S, DW_D, DW_DSIZE);
     ssSetDWorkWidth(S, DW_VR, DW_VRSIZE);
     ssSetDWorkDataType(S, DW_R, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_D, SS_DOUBLE);
+    ssSetDWorkDataType(S, DW_C, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_TT, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_RT, SS_DOUBLE);
-    ssSetDWorkDataType(S, DW_D, SS_DOUBLE);
     ssSetDWorkDataType(S, DW_VR, SS_DOUBLE);
 
     // Set up sample times:
@@ -440,6 +580,7 @@ static void mdlInitializeConditions(SimStruct *S)
     // Set a pointer to the dynamic work vectors:
     real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
     real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
+    real_T *dw_c = (real_T*) ssGetDWork(S,DW_C);
     real_T *dw_tt = (real_T*) ssGetDWork(S,DW_TT);
     real_T *dw_rt = (real_T*) ssGetDWork(S,DW_RT);
     real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
@@ -469,6 +610,7 @@ static void mdlInitializeConditions(SimStruct *S)
     {
         dw_r[i] = 0.0;
         dw_d[i] = 0.0;
+        dw_c[i] = 0.0;
     }
     for (i=0;i<DW_TTSIZE;i++)
     {
@@ -501,6 +643,15 @@ static void mdlInitializeConditions(SimStruct *S)
 //     for(i=0;i<6;i++){
 //     for(j=0;j<6;j++) printf("%f\t", D_Q[i][j]);
 //     printf("\n");}
+//     real_T v[3]={1.,2.,3.}, M[9];
+//     int_T k;
+//     skew_symmetric(M,v,0);
+//     k = 0;
+//     for(i=0;i<3;i++) {
+//         for(j=0;j<3;j++) {
+//             printf("%f\t", M[k]);
+//             k++; }
+//         printf("\n");}
   
     // Initialize the state vector:
     for(i=0;i<C_N;i++) x[i]=ics[i];
@@ -525,6 +676,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     // Set a pointer to the dynamic work vectors:
     real_T *dw_r = (real_T*) ssGetDWork(S,DW_R);
     real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
+    real_T *dw_c = (real_T*) ssGetDWork(S,DW_C);
     real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
   
     // Toss continuous states to the output port:
@@ -534,6 +686,7 @@ static void mdlOutputs(SimStruct *S, int_T tid)
     // Output the forces acting on the UUV:
     for(i=0;i<DW_RSIZE;i++) yF[i] = dw_r[i];
     for(i=0;i<DW_DSIZE;i++) yF[i+DW_RSIZE] = dw_d[i];
+    for(i=0;i<DW_CSIZE;i++) yF[i+DW_RSIZE+DW_DSIZE] = dw_c[i];
     
     // Output the relative velocity vector:
     for(i=0;i<DW_VRSIZE;i++) yVr[i] = dw_vr[i];
@@ -576,15 +729,15 @@ static void mdlDerivatives(SimStruct *S)
   real_T M_inv[6][6];
   memcpy(M_inv,M1D,6*6*sizeof(real_T));
   
-  // Snatch and map the rigid body linear damping matrix: 
-  const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
-  real_T D_L[6][6];
-  memcpy(D_L,DL1D,6*6*sizeof(real_T));
-  
-  // Snatch and map the rigid body quadratic damping matrix: 
-  const real_T *DQ1D = mxGetPr(ssGetSFcnParam(S,P_DQ));
-  real_T D_Q[6][6];
-  memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
+//   // Snatch and map the rigid body linear damping matrix: 
+//   const real_T *DL1D = mxGetPr(ssGetSFcnParam(S,P_DL));
+//   real_T D_L[6][6];
+//   memcpy(D_L,DL1D,6*6*sizeof(real_T));
+//   
+//   // Snatch and map the rigid body quadratic damping matrix: 
+//   const real_T *DQ1D = mxGetPr(ssGetSFcnParam(S,P_DQ));
+//   real_T D_Q[6][6];
+//   memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
   
   // Compute the restoring force:
   restoring_force(S);
@@ -593,6 +746,10 @@ static void mdlDerivatives(SimStruct *S)
   // Compute the damping force:
   damping_force(S);
   real_T *dw_d = (real_T*) ssGetDWork(S,DW_D);
+  
+  // Compute the Coriolis force force:
+  coriolis_force(S);
+  real_T *dw_c = (real_T*) ssGetDWork(S,DW_C);
   
   // Compute the state derivatives:
   k = 0;
@@ -616,7 +773,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<6;i++){
       tmp = 0.0;
       for (j=0;j<6;j++)
-          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]);
+          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]-dw_c[j]);
       dx[i+6] = tmp;
   }
 }

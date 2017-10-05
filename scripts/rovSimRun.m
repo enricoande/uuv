@@ -20,7 +20,7 @@ ics = zeros(12,1);        % initial conditions (m & rad)
 % n = n/60;                 % thrusters' rps
 %tau = [0;0;0;0;0;0];     % thrusters' thrust (N)
 rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
-v_c = [0.2;0;0;0;0;0];      % current velocity (m/s)
+v_c = [0;0;0;0;0;0];      % current velocity (m/s)
 
 % Pre-processing:
 Tinv = pinv(rov.T);       % inverse of the thrust allocation matrix
@@ -67,8 +67,8 @@ f = [sout.get('logsout').getElement('thrust').Values.Data,...
     sout.get('logsout').getElement('forces').Values.Data];
 % Plot the ROV's motions:
 plotMotions(t,x);
-% % Plot the ROV's forces:
-% plotForces(t,f);
+% Plot the ROV's forces:
+plotForces(t,f);
 % % Plot the ROV's path:
 % plotPath(t,x);
 % % Animate the ROV's motion:
