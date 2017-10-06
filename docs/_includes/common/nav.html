@@ -1,0 +1,9 @@
+{% assign nav = page.nav || site.nav  %}
+
+<nav role="navigation">
+  <ul>
+  {% for item in nav %}
+    <li><a href="{{ item[1] }}">{{ item[0] }}</a></li>
+  {% endfor %}
+  </ul>
+</nav>
