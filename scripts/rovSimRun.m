@@ -30,7 +30,7 @@ n_max = 1200/60;          % max. thrusters' rotational speed (rps)
 % You will need to obtain the gains by trial and error. Look at the
 % following sections one by one to prevent problems.
 % Depth: - PID controller
-zd = 0;                    % desired depth (m)
+% zd = 0;                    % desired depth (m)
 kpd = 100;                 % proportional gain               
 kid = 15;                  % integral gain
 kdd = 30;                  % derivative gain
@@ -40,10 +40,21 @@ kpu = 100;                 % proportional gain
 kdu = 10;                  % integral gain
 kiu = 20;                  % derivative gain
 % Heading: - PID controller
-psid = 0;                  % desired heading (rad)
+% psid = 0;                  % desired heading (rad)
 kppsi = 80;                % proportional gain
 kdpsi = 10;                % integral gain
-kipsi = 20;                % derivative gain
+kipsi = 20;                 
+% Steering: PID controller
+kps = 100;                 % proportional gain
+kis = 10;                  % integral gain
+kds = 20;                  % derivative gain
+
+%% Waypoints and circle of acceptance:
+waypoints = [0,0,0;
+             0.5,0,0;
+             0.5,0.5,0;
+             0.5,0.5,0.5];
+r = 0.1;
 
 tic;
 %% Load the Simulink file:
