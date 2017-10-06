@@ -35,15 +35,15 @@ kpd = 100;                 % proportional gain
 kid = 15;                  % integral gain
 kdd = 30;                  % derivative gain
 % Speed: - PID controller
-ud = 0;                    % desired speed (m/s)
+ud = 0.5;                  % desired speed (m/s)
 kpu = 100;                 % proportional gain
 kdu = 10;                  % integral gain
 kiu = 20;                  % derivative gain
 % Heading: - PID controller
 % psid = 0;                  % desired heading (rad)
-kppsi = 80;                % proportional gain
-kdpsi = 10;                % integral gain
-kipsi = 20;                 
+kppsi = 150;               % proportional gain
+kdpsi = 20;                % integral gain
+kipsi = 30;                 
 % Steering: PID controller
 kps = 100;                 % proportional gain
 kis = 10;                  % integral gain
@@ -80,7 +80,7 @@ f = [sout.get('logsout').getElement('thrust').Values.Data,...
 plotMotions(t,x);
 % Plot the ROV's forces:
 plotForces(t,f);
-% % Plot the ROV's path:
-% plotPath(t,x);
+% Plot the ROV's path:
+plotPath(t,x);
 % % Animate the ROV's motion:
-% animateAUV(t,x,50,1,4);
+% animateAUV(t,x,50,1,8);

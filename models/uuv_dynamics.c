@@ -217,7 +217,7 @@ void coriolis_force(SimStruct *S)
     real_T *rw = ssGetRWork(S);
     // Define required variables:
     int_T i,j,k;          // counters
-    real_T Av[3], Sav1[9], Sav2[9], CA[6][6];
+    real_T Av[6], Sav1[9], Sav2[9], CA[6][6];
     real_T m, Sv1[9], Sv2[9], SG[9], Iv[3], SIv[9], SGv[3][3], SvG[3][3];
     real_T CRB[6][6];
     
@@ -773,7 +773,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<6;i++){
       tmp = 0.0;
       for (j=0;j<6;j++)
-          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]-dw_c[j]);
+          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]); //-dw_c[j]);
       dx[i+6] = tmp;
   }
 }

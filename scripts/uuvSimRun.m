@@ -27,7 +27,7 @@ rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
 tic;
 %% Load the Simulink file:
 % Simulink file:
-sfile = 'uuvSim';
+sfile = 'uuvSim_simple';
 % Load the Simulink file:
 load_system(sfile);
 
@@ -52,5 +52,5 @@ plotMotions(t,x);
 plotForces(t,f);
 % % Plot the UUV's path:
 % plotPath(t,x);
-% Animate the UUV's motion:
-animateAUV(t,x,50,1,4);
+% % Animate the UUV's motion:
+% animateAUV(t,x,50,1,8);
