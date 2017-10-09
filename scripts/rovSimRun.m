@@ -19,7 +19,8 @@ ics = zeros(12,1);        % initial conditions (m & rad)
 % n = [0;0;0;700;1000];     % thrusters' rpm
 % n = n/60;                 % thrusters' rps
 %tau = [0;0;0;0;0;0];     % thrusters' thrust (N)
-rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
+% rov.weight = 4.92056575e+03;  % correction for incorrect weight (N)
+rov.weight = rov.buoyancy;
 v_c = [0;0;0;0;0;0];      % current velocity (m/s)
 
 % Pre-processing:
@@ -31,11 +32,11 @@ n_max = 1200/60;          % max. thrusters' rotational speed (rps)
 % following sections one by one to prevent problems.
 % Depth: - PID controller
 % zd = 0;                    % desired depth (m)
-kpd = 100;                 % proportional gain               
+kpd = 120;                 % proportional gain               
 kid = 15;                  % integral gain
 kdd = 30;                  % derivative gain
 % Speed: - PID controller
-ud = 0.5;                  % desired speed (m/s)
+ud = 0.1;                  % desired speed (m/s)
 kpu = 100;                 % proportional gain
 kdu = 10;                  % integral gain
 kiu = 20;                  % derivative gain
@@ -51,9 +52,8 @@ kds = 20;                  % derivative gain
 
 %% Waypoints and circle of acceptance:
 waypoints = [0,0,0;
-             0.5,0,0;
-             0.5,0.5,0;
-             0.5,0.5,0.5];
+             2,0,0;
+             2,4,0];
 r = 0.1;
 
 tic;
@@ -78,9 +78,9 @@ f = [sout.get('logsout').getElement('thrust').Values.Data,...
     sout.get('logsout').getElement('forces').Values.Data];
 % Plot the ROV's motions:
 plotMotions(t,x);
-% Plot the ROV's forces:
-plotForces(t,f);
+% % Plot the ROV's forces:
+% plotForces(t,f);
 % Plot the ROV's path:
-plotPath(t,x);
+plotPath(x,waypoints);
 % % Animate the ROV's motion:
 % animateAUV(t,x,50,1,8);
