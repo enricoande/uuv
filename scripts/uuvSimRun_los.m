@@ -46,20 +46,21 @@ kppsi = 150;               % proportional gain
 kdpsi = 20;                % integral gain
 kipsi = 30;                 
 % Steering: PID controller
-kps = 100;                 % proportional gain
-kis = 10;                  % integral gain
-kds = 20;                  % derivative gain
+kps = 40;                 % proportional gain
+kis = 5;                  % integral gain
+kds = 10;                  % derivative gain
 
 %% Waypoints and circle of acceptance:
 waypoints = [0,0,0;
              2,0,0;
-             2,4,0];
+             2,4,0
+             6,4,2];
 r = 0.1;
 
 tic;
 %% Load the Simulink file:
 % Simulink file:
-sfile = 'uuvSim_los';
+sfile = 'rovSim_los';
 % Load the Simulink file:
 load_system(sfile);
 
