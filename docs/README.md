@@ -53,7 +53,7 @@ and the 6DOF velocity vector in the *body-fixed* reference frame as
 
 $$ \mathbf{\nu} = \begin{bmatrix} u & v & w & p & q & r \end{bmatrix}^T .$$
 
-Additionally, it is possible to include the effects of an external current represented by the velocity vector $ \mathbf{\nu}_\mathrm{c} $, whose 4<sup>th</sup> to 6<sup>th</sup> entries are zero for an irrotational current. The relative velocity vector in body-fixed coordinates is represented by
+Additionally, it is possible to include the effects of an external current represented by the velocity vector $$\mathbf{\nu}_\mathrm{c}$$, whose 4<sup>th</sup> to 6<sup>th</sup> entries are zero for an irrotational current. The relative velocity vector in body-fixed coordinates is represented by
 
  $$\mathbf{\nu}_\mathrm{r} = \mathbf{\nu} - \mathbf{\nu}_\mathrm{c}  . $$
 
@@ -61,24 +61,35 @@ Then, the dynamics of an UUV can be expressed by the following system of ordinar
 
 $$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bmatrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} \\ \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( \mathbf{f}_\mathrm{h} + \mathbf{f}_\mathrm{d} + \mathbf{f}_\mathrm{C} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
 
-where $\mathbf{J}$ is the transformation matrix for the generalized coordinates, $\mathbf{M}_\mathrm{RB}$ the inertia matrix of the rigid body, $\mathbf{M}_\mathrm{A}$ the added mass inertia matrix, $\mathbf{f}_\mathrm{h}$ the hydrostating restoring force vector, $\mathbf{f}_\mathrm{d}$ the damping force vector, $\mathbf{f}_\mathrm{C}$ the Coriolis force vector, $\mathbf{f}_\mathrm{e}$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $\mathbf{\tau}$ the thrust force vector.
+where $$\mathbf{J}$$ is the transformation matrix for the generalized coordinates, $$\mathbf{M}_\mathrm{RB}$$ the inertia matrix of the rigid body, $$\mathbf{M}_\mathrm{A}$$ the added mass inertia matrix, $$\mathbf{f}_\mathrm{h}$$ the hydrostating restoring force vector, $$\mathbf{f}_\mathrm{d}$$ the damping force vector, $$\mathbf{f}_\mathrm{c}$$ the Coriolis force vector, $$\mathbf{f}_\mathrm{e}$$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $$\mathbf{\tau}$$ the thrust force vector.
 
 The restoring force vector is given by
+
 $$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (\_g W - \_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi \\ (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
-where $W$ is the weight force, $B$ the buoyancy force, $\mathrm{COG} = [x_g,y_g,z_g]$ and $\mathrm{COB} = [x_b,y_b,z_b]$.
+
+where $W$ is the weight force, $$B$$ the buoyancy force, $$\mathrm{COG} = [x_g,y_g,z_g]$$ and $$\mathrm{COB} = [x_b,y_b,z_b]$$.
 
 The damping force vector is represented by a linear and a quadratic term:
-$$ \mathbf{f}_\mathrm{d} = \mathbf{D}_\mathrm{l} \mathbf{\nu}_\mathrm{r} + \mathbf{D}_\mathrm{q} \mathrm{diag}\left( | \mathbf{\nu}_\mathrm{r} |\right) \mathbf{\nu}_\mathrm{r} , $$
-where $\mathbf{D}_\mathrm{l}$ and $\mathbf{D}_\mathrm{q}$ are the linear and quadratic damping matrices, respectively.
 
-The $(6\times 1)$ thrust force vector is obtained as
+$$ \mathbf{f}_\mathrm{d} = \mathbf{D}_\mathrm{l} \mathbf{\nu}_\mathrm{r} + \mathbf{D}_\mathrm{q} \mathrm{diag}\left( | \mathbf{\nu}_\mathrm{r} |\right) \mathbf{\nu}_\mathrm{r} , $$
+
+where $$\mathbf{D}_\mathrm{l}$ and $\mathbf{D}_\mathrm{q}$$ are the linear and quadratic damping matrices, respectively.
+
+The $$(6\times 1)$$ thrust force vector is obtained as
+
 $$ \mathbf{\tau} = \mathbf{T} \mathbf{f}_\mathrm{th}, $$
-where $\mathbf{T}$ is the thrust allocation matrix and $\mathbf{f}_\mathrm{th}$ is the thrust force vector that has an entry for every thruster. Hence, the thrust allocation matrix expresses the contribution of each motor in each degree of freedom in the body-fixed coordinate system. Therefore, the thrust allocation matrix is constant if the motors do not rotate.
+
+where $$\mathbf{T}$$ is the thrust allocation matrix and $$\mathbf{f}_\mathrm{th}$$ is the thrust force vector that has an entry for every thruster. Hence, the thrust allocation matrix expresses the contribution of each motor in each degree of freedom in the body-fixed coordinate system. Therefore, the thrust allocation matrix is constant if the motors do not rotate.
+
 The thrust force vector is calculated as
+
 $$ \mathbf{f}_\mathrm{th} = \rho \mathbf{D}^4 \odot \mathrm{K}_\mathrm{T} \odot | \mathbf{n} | \odot \mathbf{n} \odot \mathbf{\theta} $$
-where all vectors have the length equal to the number of propulsors and $\odot$ indicates element-wise multiplication. $\mathbf{D}$ is the vector of diameters, $\mathbf{\theta}$ is the thrust loss coefficient vector, $\mathbf{n}$ is the propulsors' rotational velocity, which is output by the controller, and $\mathbf{K}_\mathrm{T}$ is the thrust coefficient vector, which is a function of the advance ratio vector
+
+where all vectors have the length equal to the number of propulsors and $$\odot$$ indicates element-wise multiplication. $$\mathbf{D}$$ is the vector of diameters, $$\mathbf{\theta}$$ is the thrust loss coefficient vector, $$\mathbf{n}$$ is the propulsors' rotational velocity, which is output by the controller, and $$\mathbf{K}_\mathrm{T}$$ is the thrust coefficient vector, which is a function of the advance ratio vector
+
 $$ \mathbf{J}_\mathrm{a} = \frac{\mathbf{\nu}_\mathrm{a}}{\mathbf{n}\mathbf{D}}, $$
-where $\mathbf{\nu}_\mathrm{a}$ is the vector of tehe velocity of the propellers through the water.
+
+where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of tehe velocity of the propellers through the water.
 
 ### References
 T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
