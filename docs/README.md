@@ -43,7 +43,7 @@ S. M. Mo (2015). _Development of a Simulation Platform for ROV Systems_. Norwegi
 
 ## UUV dynamics
 
-The notation and equations introduced in Fossen (2011) have been used to program the UUV dynamics. However, the downward right-hand rule convention (north,east,down) is employed at the moment.
+The notation and equations introduced in Fossen (2011) have been used to program the UUV dynamics. However, the downward right-hand rule convention (north,west,down) is employed at the moment.
 
 Let us define the motions in 6 degrees of freedom (DOF) in the *inertial* reference frame as
 
@@ -59,7 +59,7 @@ Additionally, it is possible to include the effects of an external current repre
 
 Then, the dynamics of an UUV can be expressed by the following system of ordinary differential equations:
 
-$$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bmatrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} \\ \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( - \mathbf{f}_\mathrm{h} - \mathbf{f}_\mathrm{d} - \mathbf{f}_\mathrm{c} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
+$$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bmatrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu}_\mathrm{r} \\ \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( - \mathbf{f}_\mathrm{h} - \mathbf{f}_\mathrm{d} - \mathbf{f}_\mathrm{c} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
 
 where $$\mathbf{J}$$ is the transformation matrix for the generalized coordinates, $$\mathbf{M}_\mathrm{RB}$$ the inertia matrix of the rigid body, $$\mathbf{M}_\mathrm{A}$$ the added mass inertia matrix, $$\mathbf{f}_\mathrm{h}$$ the hydrostating restoring force vector, $$\mathbf{f}_\mathrm{d}$$ the damping force vector, $$\mathbf{f}_\mathrm{c}$$ the Coriolis force vector, $$\mathbf{f}_\mathrm{e}$$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $$\mathbf{\tau}$$ the thrust force vector.
 
@@ -99,10 +99,29 @@ $$ \mathbf{J}_\mathrm{a} = \frac{\mathbf{\nu}_\mathrm{a}}{\mathbf{n}\mathbf{D}},
 
 where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of the velocity of the propellers through the water.
 
-### References
+## LOS guidance
+
+
+## PID controller
+
+At the moment, very simple PID controllers have been implemented for the control of the surge velocity, $$u$$, the UUV depth, $$z$$, and the heading, $$\psi$$.
+
+
+
+## Path tracking
+
+Path generation and tracking routines are still missing, although a simple minimum-snap trajectory generation and following scheme is implemented for ROVs.
+
+## References
+F. Dukan (2014). _ROV Motion Control Systems_. Norwegian University of Science and Technology (NTNU), Ph.D. thesis.
+
 T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
 
-### To-do list
+A. M. Lekkas (2014). _Guidance and Path-Planning Systems for Autonomous Vehicles_. Norwegian University of Science and Technology (NTNU), Ph.D. thesis.
+
+S. M. Mo (2015). _Development of a Simulation Platform for ROV Systems_. Norwegian University of Science and Technology (NTNU), M.Sc. thesis.
+
+## To-do list
 
 * The convention used may be subject to change later on, although care must be taken not to get confused.
 * At the moment, transformation matrix relies on the roll, pitch and yaw angles. However, quaternions will be used in the future to prevent instabilities.
