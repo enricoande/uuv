@@ -106,7 +106,25 @@ where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of the velocity of the propeller
 
 At the moment, very simple PID controllers have been implemented for the control of the surge velocity, $$u$$, the UUV depth, $$z$$, and the heading, $$\psi$$.
 
+The thrust force vector is computed from the inverse of the thrust allocation matrix as follows:
 
+$$ \mathbf{f}_\mathrm{th} = \mathbf{T}^{-1} \mathbf{p}_\mathrm{c} , $$
+
+where $$\mathbf{p}_\mathrm{c}$ is the $$(6\times 1)$$ vector of control parameters. For the simple PID controller implemented here, the vector of control parameters is given by
+
+$$ \mathbf{p}_\mathrm{c} = \begin{bmatrix} p_\mathrm{c,speed} & 0 & p_\mathrm{c,depth} & 0 & 0 & p_\mathrm{c,heading}  \end{bmatrix}^T. $$
+
+Using simple PID controllers, it is possible to obtain the control parameters for speed, depth and heading as
+
+$$ p_\mathrm{c,speed} = -k_\mathrm{p,speed} \left( u(t)-u_\mathrm{d} (t) \right) - k_\mathrm{i,speed} \int_0^T \left( u(\tau)-u_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,speed} \left( \dot{u}(t)-\dot{u}_\mathrm{d} (t) \right), $$
+
+$$ p_\mathrm{c,depth} = -k_\mathrm{p,depth} \left( z(t)-z_\mathrm{d} (t) \right) - k_\mathrm{i,depth} \int_0^T \left( z(\tau)-z_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,depth} \left( \dot{z}(t)-\dot{z}_\mathrm{d} (t) \right), $$
+
+$$ p_\mathrm{c,heading} = -k_\mathrm{p,heading} \left( \psi(t)-\psi_\mathrm{d} (t) \right) - k_\mathrm{i,heading} \int_0^T \left( \psi(\tau)-\psi_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,heading} \left( \dot{\psi}(t)-\dot{\psi}_\mathrm{d} (t) \right), $$
+
+where $$k_\mathrm{p,speed}$$, $$k_\mathrm{i,speed}$$, $$k_\mathrm{d,speed}$$, $$k_\mathrm{p,depth}$$, $$k_\mathrm{i,depth}$$, $$k_\mathrm{d,depth}$$, $$k_\mathrm{p,heading}$$, $$k_\mathrm{i,heading}$$ and $$k_\mathrm{d,heading}$$ are the proportional, integral and derivative gains for the speed, depth and heading, respectively. Additionally, $$u_\mathrm{d}$$, $$z_\mathrm{d}$$ and $$\psi_\mathrm{d}$$ are the desired speed, depth and heading. At the moment, a very simple scheme is used that relies on a fixed forward speed setting, $U$. In order to prevent a big overshoot in tight corners, the desired speed is set as
+
+$$ u_\mathrm{d} = \begin{case} U - \frac{U}{\pi/2} | \psi \psi_\mathrm{d} | & \text{if } | \psi \psi_\mathrm{d} | \leq \frac{\pi}{2} \\ 0 & \text{if } | \psi \psi_\mathrm{d} | > \frac{\pi}{2} .$$
 
 ## Path tracking
 
