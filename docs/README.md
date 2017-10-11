@@ -55,7 +55,7 @@ $$ \mathbf{\nu} = \begin{bmatrix} u & v & w & p & q & r \end{bmatrix}^T .$$
 
 Additionally, it is possible to include the effects of an external current represented by the velocity vector $ \mathbf{\nu}_\mathrm{c} $, whose 4<sup>th</sup> to 6<sup>th</sup> entries are zero for an irrotational current. The relative velocity vector in body-fixed coordinates is represented by
 
- $$\mathbf{\nu}_\mathrm{r} = \mathbf{\nu} - mathbf{\nu}_\mathrm{c}  . $$
+ $$\mathbf{\nu}_\mathrm{r} = \mathbf{\nu} - \mathbf{\nu}_\mathrm{c}  . $$
 
 Then, the dynamics of an UUV can be expressed by the following system of ordinary differential equations:
 
