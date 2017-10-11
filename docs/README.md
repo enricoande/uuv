@@ -6,15 +6,17 @@ Welcome to the wiki of the `uuv` project!
 
 Here you can find up-to-date information on the `uuv` repository.
 
-First of all, the repository contains software that is used to simulate and control a single ROV in the Matlab/Simulink environment.
+First of all, the repository contains software that is used to simulate and control a single unmanned underwater vehicle (UUV) in the Matlab/Simulink environment.
 
 # Current status
 
 The code is not fully functional yet. At the moment, the following items have been implemented:
 * Directory in recommended Matlab/Simulink project format;
-* ROV 6DOF dynamics block in Simulink (C S-function), including added mass, damping and hydrostatic forces;
-* An external current (Matlab/Simulink);
+* UUV 6DOF dynamics block in Simulink (C S-function), including added mass, damping, hydrostatic and centripetal (deactivated for the time being) forces and external current effects;
 * A thrust block in Simulink (C S-function) that takes propeller revolutions as input and returns the 6DOF thrust vector;
+* A simple PID controller in surge, heave and yaw;
+* A very basic line of sight guidance system;
+* Very basic trajectory generation and following functions;
 * Plotting and animation functions (Matlab);
 * Preprocessing functions (Matlab), including data from the Minerva ROV used at NTNU.
 
@@ -22,8 +24,50 @@ The code is not fully functional yet. At the moment, the following items have be
 
 Before the software can be considered as fully functional, the following items are required:
 * Path planning methods in Matlab;
-* Guidance methods (target & trajectory tracking and path following) in Simulink/Matlab;
-* ROV control routines (dynamic positioning and path controller) in Simulink;
+* Guidance methods (target & trajectory tracking and path following) in Simulink/Matlab for both ROVs and AUVs;
+* ROV and AUV control routines (dynamic positioning and path controller) in Simulink;
+* Thrust models for AUVs.
+
+# Code structure
+
+The code follows a standard Matlab/Simulink project convention. 
+The main files and directories are as follows:
+* `startup.m`: file that modifies the Matlab path so that all files and directories of interest can be accessed;
+* `cleanup.m`: file that clears unwanted clutter and cleans the Matlab path;
+* `.\data`: directory that contains the required parameters for the desired UUVs. Note that the data should be saved in `.mat` format as a structure with the same format as the example `rov.mat` file.
+* `.\functions`: directory that contains some useful functions;
+** `animateAUV.m`: post-processing, low-cost function used to animate the UUV in 3D space in Matlab;
+** `plotForces.m`: post-processing function used to plot the forces of interest in Matlab;
+** `plotMotions.m`: post-processing function use to plot the motions of interest in Matlab;
+** `plotPath.m`: post-processing function to plot the path of the UUV in Matlab;
+** `rotation.m`: function to rotate a 3D body in space in an inertial reference frame;
+** `skew.m`: function to create a skew-symmetric matrix.
+* `.\models`: directory that contains the Simulink models of the UUVs;
+** `rov_thrust.c`: C function of the thrust dynamics of a ROV;
+** `rovSim_los.slx`: Simulink model of a ROV with line of sight guidance and PID control;
+** `uuv_dynamics.c`: C function of the 6DOF dynamics of the UUV;
+** `uuvSim_simple`: Simulink model of a simple UUV without thrust block.
+* `.\scripts`: directory that contains the main scripts for running the simulations;
+** `rovSimRun.m`: function that runs the simulation for the ROV with line of sight guidance and PID control;
+** `rovSimSetup.m`: set-up function for the ROV;
+** `uuvSimRun.m`: function to run a simple UUV model;
+** `uuvSimRun_los.m`: function to run a UUV model with line of sight guidance
+** `uuvSimSetup.m`: set-up function for an AUV.
+
+Additionally, the following files and directories may also be of use:
+* `.\docs`: directory that contains all documents, such as this one;
+* `.\extra`: directory that contains extra files;
+** `rovSim_trj.slx`: Simulink model of a ROV with minimum-snap trajectory generation and path following;
+** `test_trajectory.m`: file to test the generation of minimum-snap trajectories in 3D space;
+** `Trajectory.m`: class used to generate 3D trajectories (incomplete);
+** `uuvSimRun_trj.m`: file to run the simulation of a ROV that follows minimum-snap trajectories in 3D space (incomplete).
+* `.\preprocessing`: directory that contains pre-processing functions;
+** `readData.m`: function used to read input data from UUV parameters and generate a structure compatible with the models used in this project.
+* `.\work`: directory that contains all work and temporary files, which will be cleared at the end.
+
+# Quick user guide
+
+This
 
 # Supported UUVs
 
