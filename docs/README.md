@@ -67,13 +67,13 @@ The restoring force vector is given by
 
 $$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (\_g W - \_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi \\ (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
 
-where $W$ is the weight force, $$B$$ the buoyancy force, $$\mathrm{COG} = [x_g,y_g,z_g]$$ and $$\mathrm{COB} = [x_b,y_b,z_b]$$.
+where $$W$$ is the weight force, $$B$$ the buoyancy force, $$\mathrm{COG} = [x_g,y_g,z_g]$$ and $$\mathrm{COB} = [x_b,y_b,z_b]$$.
 
 The damping force vector is represented by a linear and a quadratic term:
 
 $$ \mathbf{f}_\mathrm{d} = \mathbf{D}_\mathrm{l} \mathbf{\nu}_\mathrm{r} + \mathbf{D}_\mathrm{q} \mathrm{diag}\left( | \mathbf{\nu}_\mathrm{r} |\right) \mathbf{\nu}_\mathrm{r} , $$
 
-where $$\mathbf{D}_\mathrm{l}$ and $\mathbf{D}_\mathrm{q}$$ are the linear and quadratic damping matrices, respectively.
+where $$\mathbf{D}_\mathrm{l}$$ and $$\mathbf{D}_\mathrm{q}$$ are the linear and quadratic damping matrices, respectively.
 
 The $$(6\times 1)$$ thrust force vector is obtained as
 
