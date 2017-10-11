@@ -36,33 +36,33 @@ The main files and directories are as follows:
 * `cleanup.m`: file that clears unwanted clutter and cleans the Matlab path;
 * `.\data`: directory that contains the required parameters for the desired UUVs. Note that the data should be saved in `.mat` format as a structure with the same format as the example `rov.mat` file.
 * `.\functions`: directory that contains some useful functions;
-** `animateAUV.m`: post-processing, low-cost function used to animate the UUV in 3D space in Matlab;
-** `plotForces.m`: post-processing function used to plot the forces of interest in Matlab;
-** `plotMotions.m`: post-processing function use to plot the motions of interest in Matlab;
-** `plotPath.m`: post-processing function to plot the path of the UUV in Matlab;
-** `rotation.m`: function to rotate a 3D body in space in an inertial reference frame;
-** `skew.m`: function to create a skew-symmetric matrix.
+  * `animateAUV.m`: post-processing, low-cost function used to animate the UUV in 3D space in Matlab;
+  * `plotForces.m`: post-processing function used to plot the forces of interest in Matlab;
+  * `plotMotions.m`: post-processing function use to plot the motions of interest in Matlab;
+  * `plotPath.m`: post-processing function to plot the path of the UUV in Matlab;
+  * `rotation.m`: function to rotate a 3D body in space in an inertial reference frame;
+  * `skew.m`: function to create a skew-symmetric matrix.
 * `.\models`: directory that contains the Simulink models of the UUVs;
-** `rov_thrust.c`: C function of the thrust dynamics of a ROV;
-** `rovSim_los.slx`: Simulink model of a ROV with line of sight guidance and PID control;
-** `uuv_dynamics.c`: C function of the 6DOF dynamics of the UUV;
-** `uuvSim_simple`: Simulink model of a simple UUV without thrust block.
+  * `rov_thrust.c`: C function of the thrust dynamics of a ROV;
+  * `rovSim_los.slx`: Simulink model of a ROV with line of sight guidance and PID control;
+  * `uuv_dynamics.c`: C function of the 6DOF dynamics of the UUV;
+  * `uuvSim_simple`: Simulink model of a simple UUV without thrust block.
 * `.\scripts`: directory that contains the main scripts for running the simulations;
-** `rovSimRun.m`: function that runs the simulation for the ROV with line of sight guidance and PID control;
-** `rovSimSetup.m`: set-up function for the ROV;
-** `uuvSimRun.m`: function to run a simple UUV model;
-** `uuvSimRun_los.m`: function to run a UUV model with line of sight guidance
-** `uuvSimSetup.m`: set-up function for an AUV.
+  * `rovSimRun.m`: function that runs the simulation for the ROV with line of sight guidance and PID control;
+  * `rovSimSetup.m`: set-up function for the ROV;
+  * `uuvSimRun.m`: function to run a simple UUV model;
+  * `uuvSimRun_los.m`: function to run a UUV model with line of sight guidance
+  * `uuvSimSetup.m`: set-up function for an AUV.
 
 Additionally, the following files and directories may also be of use:
 * `.\docs`: directory that contains all documents, such as this one;
 * `.\extra`: directory that contains extra files;
-** `rovSim_trj.slx`: Simulink model of a ROV with minimum-snap trajectory generation and path following;
-** `test_trajectory.m`: file to test the generation of minimum-snap trajectories in 3D space;
-** `Trajectory.m`: class used to generate 3D trajectories (incomplete);
-** `uuvSimRun_trj.m`: file to run the simulation of a ROV that follows minimum-snap trajectories in 3D space (incomplete).
+  * `rovSim_trj.slx`: Simulink model of a ROV with minimum-snap trajectory generation and path following;
+  * `test_trajectory.m`: file to test the generation of minimum-snap trajectories in 3D space;
+  * `Trajectory.m`: class used to generate 3D trajectories (incomplete);
+  * `uuvSimRun_trj.m`: file to run the simulation of a ROV that follows minimum-snap trajectories in 3D space (incomplete).
 * `.\preprocessing`: directory that contains pre-processing functions;
-** `readData.m`: function used to read input data from UUV parameters and generate a structure compatible with the models used in this project.
+  * `readData.m`: function used to read input data from UUV parameters and generate a structure compatible with the models used in this project.
 * `.\work`: directory that contains all work and temporary files, which will be cleared at the end.
 
 # Quick user guide
