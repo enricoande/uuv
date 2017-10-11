@@ -126,6 +126,8 @@ where $$k_\mathrm{p,speed}$$, $$k_\mathrm{i,speed}$$, $$k_\mathrm{d,speed}$$, $$
 
 $$ u_\mathrm{d} = \left{ U - \frac{U}{\pi/2} | \psi \psi_\mathrm{d} | .$$
 
+The desired heading and depth are set by the guidance system (at the moment, a simple decoupled line of sight guidance system).
+
 ## Path tracking
 
 Path generation and tracking routines are still missing, although a simple minimum-snap trajectory generation and following scheme is implemented for ROVs.
