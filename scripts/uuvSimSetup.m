@@ -15,7 +15,7 @@ mdl.tStep = 0.01;         % time step length (s)
 mdl.tEnd  = 20;           % end time (s)
 
 %% UUV model set-up:
-load('../data/rov.mat');  % rov object
+load('rov.mat');  % rov object
 % Faheem: you will beed to change this with the REMUS data. The object is 
 % generated with the function readData.m in the directory ../preprocessing.
 % You will need to create a new folder similar to ../preprocessing/Minerva 
