@@ -59,13 +59,13 @@ Additionally, it is possible to include the effects of an external current repre
 
 Then, the dynamics of an UUV can be expressed by the following system of ordinary differential equations:
 
-$$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bmatrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} \\ \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( \mathbf{f}_\mathrm{h} + \mathbf{f}_\mathrm{d} + \mathbf{f}_\mathrm{C} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
+$$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \begin{bmatrix} \mathbf{J}(\mathbf{\eta}) \mathbf{\nu} \\ \left( \mathbf{M}_\mathrm{RB} + \mathbf{M}_\mathrm{A} \right)^{-1} \left( \mathbf{f}_\mathrm{h} + \mathbf{f}_\mathrm{d} + \mathbf{f}_\mathrm{c} + \mathbf{f}_\mathrm{e} + \mathbf{\tau} \right) \end{bmatrix} ,$$
 
 where $$\mathbf{J}$$ is the transformation matrix for the generalized coordinates, $$\mathbf{M}_\mathrm{RB}$$ the inertia matrix of the rigid body, $$\mathbf{M}_\mathrm{A}$$ the added mass inertia matrix, $$\mathbf{f}_\mathrm{h}$$ the hydrostating restoring force vector, $$\mathbf{f}_\mathrm{d}$$ the damping force vector, $$\mathbf{f}_\mathrm{c}$$ the Coriolis force vector, $$\mathbf{f}_\mathrm{e}$$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $$\mathbf{\tau}$$ the thrust force vector.
 
 The restoring force vector is given by
 
-$$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (\_g W - \_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi \\ (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
+$$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (z_g W - z_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi \\ (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
 
 where $$W$$ is the weight force, $$B$$ the buoyancy force, $$\mathrm{COG} = [x_g,y_g,z_g]$$ and $$\mathrm{COB} = [x_b,y_b,z_b]$$.
 
@@ -74,6 +74,14 @@ The damping force vector is represented by a linear and a quadratic term:
 $$ \mathbf{f}_\mathrm{d} = \mathbf{D}_\mathrm{l} \mathbf{\nu}_\mathrm{r} + \mathbf{D}_\mathrm{q} \mathrm{diag}\left( | \mathbf{\nu}_\mathrm{r} |\right) \mathbf{\nu}_\mathrm{r} , $$
 
 where $$\mathbf{D}_\mathrm{l}$$ and $$\mathbf{D}_\mathrm{q}$$ are the linear and quadratic damping matrices, respectively.
+
+The Coriolis and centripetal force vector is computed as follows:
+
+$$ \mathbf{f}_\mathrm{c} = \mathbf{C}_\mathrm{RB}(\mathbf{\nu})\mathbf{\nu} + \mathbf{C}_\mathrm{A}(\mathbf{\nu}_\mathrm{r})\mathbf{\nu}_\mathrm{r}  $$
+
+where the first term represents a fictitious force that causes a movement of the UUV relative to the rotating reference frame due to the Earth's rotation and the second term describes the effects related to the added mass. Note that at the moment, this term is commented out.
+
+### ROVs
 
 The $$(6\times 1)$$ thrust force vector is obtained as
 
@@ -89,7 +97,7 @@ where all vectors have the length equal to the number of propulsors and $$\odot$
 
 $$ \mathbf{J}_\mathrm{a} = \frac{\mathbf{\nu}_\mathrm{a}}{\mathbf{n}\mathbf{D}}, $$
 
-where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of tehe velocity of the propellers through the water.
+where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of the velocity of the propellers through the water.
 
 ### References
 T. I. Fossen (2011). _Handbook of Marine Craft Hydrodynamics and Motion Control_. John Wiley & Sons, first edition.
