@@ -64,7 +64,7 @@ $$\begin{bmatrix} \mathbf{\dot{\eta}} \\ \mathbf{\dot{\nu}} \end{bmatrix} = \beg
 where $\mathbf{J}$ is the transformation matrix for the generalized coordinates, $\mathbf{M}_\mathrm{RB}$ the inertia matrix of the rigid body, $\mathbf{M}_\mathrm{A}$ the added mass inertia matrix, $\mathbf{f}_\mathrm{h}$ the hydrostating restoring force vector, $\mathbf{f}_\mathrm{d}$ the damping force vector, $\mathbf{f}_\mathrm{C}$ the Coriolis force vector, $\mathbf{f}_\mathrm{e}$ the environmental force vector (which includes the tether effects if one is present, e.g. on a ROV) and $\mathbf{\tau}$ the thrust force vector.
 
 The restoring force vector is given by
-$$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (\_g W - \_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi // (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
+$$ \mathbf{f}_\mathrm{h} = \begin{bmatrix} (W-B) \sin \theta \\ (B-W) \cos \theta \sin \phi \\ (B-W) \cos \theta \cos \phi \\ (y_b B - y_g W\cos \theta \cos \phi + (z_g W -z_b B ) \cos \theta \sin \phi \\ (\_g W - \_b B ) \sin \theta + (x_g W - x_b B ) \cos \theta \cos \phi \\ (x_b B -x_g W ) \cos \theta \sin \phi - (y_b B - y_g W ) \sin \theta \end{bmatrix} , $$
 where $W$ is the weight force, $B$ the buoyancy force, $\mathrm{COG} = [x_g,y_g,z_g]$ and $\mathrm{COB} = [x_b,y_b,z_b]$.
 
 The damping force vector is represented by a linear and a quadratic term:
