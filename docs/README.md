@@ -124,7 +124,7 @@ $$ p_\mathrm{c,heading} = -k_\mathrm{p,heading} \left( \psi(t)-\psi_\mathrm{d} (
 
 where $$k_\mathrm{p,speed}$$, $$k_\mathrm{i,speed}$$, $$k_\mathrm{d,speed}$$, $$k_\mathrm{p,depth}$$, $$k_\mathrm{i,depth}$$, $$k_\mathrm{d,depth}$$, $$k_\mathrm{p,heading}$$, $$k_\mathrm{i,heading}$$ and $$k_\mathrm{d,heading}$$ are the proportional, integral and derivative gains for the speed, depth and heading, respectively. Additionally, $$u_\mathrm{d}$$, $$z_\mathrm{d}$$ and $$\psi_\mathrm{d}$$ are the desired speed, depth and heading. At the moment, a very simple scheme is used that relies on a fixed forward speed setting, $U$. In order to prevent a big overshoot in tight corners, the desired speed is set as
 
-$$ u_\mathrm{d} = \begin{cases} U - \frac{U}{\pi/2} |\psi - \psi_\mathrm{d}| \quad \text{if } |\psi-\psi_\mathrm{d}| \leq \frac{\pi}{2} ,  \\ 0 \end{cases} \quad \text{if } |\psi-\psi_\mathrm{d}| > \frac{\pi}{2}  . $$
+$$ u_\mathrm{d} = \begin{cases} U - \frac{U}{\pi/2} |\psi - \psi_\mathrm{d}| \quad \text{if } |\psi-\psi_\mathrm{d}| \leq \frac{\pi}{2} ,  \\ 0  \quad \text{if } |\psi-\psi_\mathrm{d}| > \frac{\pi}{2} . \end{cases} $$
 
 The desired heading $$\psi_\mathrm{d}$$ and depth $$z_\mathrm{d}$$ are set by the guidance system (at the moment, a simple decoupled line of sight guidance system).
 
@@ -143,7 +143,8 @@ S. M. Mo (2015). _Development of a Simulation Platform for ROV Systems_. Norwegi
 
 ## To-do list
 
-* The convention used may be subject to change later on, although care must be taken not to get confused.
-* At the moment, transformation matrix relies on the roll, pitch and yaw angles. However, quaternions will be used in the future to prevent instabilities.
+* Path planning and tracking tools will need to be created.
+* The convention used may be subject to change later on, although care must be taken not to get confused. Note that the animation displays the UUV in a NEU inertial frame.
+* At the moment, transformation matrix relies on the roll, pitch and yaw angles. However, quaternions can be used in the future to prevent instabilities for angles close to $$90^\circ$$.
 * At the moment, the analysed UUVs are assumed not to travel far (in towing tanks or lakes). Hence, the Coriolis force correction has not been implemented yet. This will need to be done.
 * At the moment, the tether force for ROVs is not included within the model.
