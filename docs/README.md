@@ -67,7 +67,36 @@ Additionally, the following files and directories may also be of use:
 
 # Quick user guide
 
-This
+**IMPORTANT**: please, do NOT make changes to the master branch without approval. Pull down a personal branch and make changes and saves there instead.
+
+## Compilation of the C files
+
+The first step to complete before running the simulations is to compile the C-coded S-functions in Simulink (`rov_thrust.c` and `uuv_dynamics.c`) located in the `.\models\` directory.
+
+This can be done with the commands
+`mex rov_thrust.c` ,
+`mex uuv_dynamics.c` .
+As a result, you should see `.mex` or `.mexw64` in the directory `.\models\`.
+
+Note that before you take this step, it is fundamental to have a C/C++ compiler installed (supported by/compatible with Matlab).
+* In Windows, install the _MinGW-w64_ compiler from the `Add-Ons` app.
+* In Linux, install _gcc_ (which should be preinstalled).
+* In OSX, install _Xcode_.
+
+## Running simulations
+
+After the C files are compiled, it is possible to run the desired simulations.
+
+From the main project directory, first run
+`startup` 
+on the Matlab shell.
+
+Then, you can run any simulations. As an example, run
+`uuvSimRun` .
+
+When finished, run
+`cleanup`
+to clean up the temporary files and the Matlab path.
 
 # Supported UUVs
 
