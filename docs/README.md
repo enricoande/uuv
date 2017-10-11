@@ -124,7 +124,7 @@ $$ p_\mathrm{c,heading} = -k_\mathrm{p,heading} \left( \psi(t)-\psi_\mathrm{d} (
 
 where $$k_\mathrm{p,speed}$$, $$k_\mathrm{i,speed}$$, $$k_\mathrm{d,speed}$$, $$k_\mathrm{p,depth}$$, $$k_\mathrm{i,depth}$$, $$k_\mathrm{d,depth}$$, $$k_\mathrm{p,heading}$$, $$k_\mathrm{i,heading}$$ and $$k_\mathrm{d,heading}$$ are the proportional, integral and derivative gains for the speed, depth and heading, respectively. Additionally, $$u_\mathrm{d}$$, $$z_\mathrm{d}$$ and $$\psi_\mathrm{d}$$ are the desired speed, depth and heading. At the moment, a very simple scheme is used that relies on a fixed forward speed setting, $U$. In order to prevent a big overshoot in tight corners, the desired speed is set as
 
-$$ u_\mathrm{d} = \begin{case} U - \frac{U}{\pi/2} | \psi \psi_\mathrm{d} | & if  $| \psi \psi_\mathrm{d} | \leq \frac{\pi}{2}$ \\ 0 & if $| \psi \psi_\mathrm{d} | > \frac{\pi}{2}$ \end{case}.$$
+$$ u_\mathrm{d} = \begin{case} U - \frac{U}{\pi/2} | \psi \psi_\mathrm{d} | \\ 0  \end{case}.$$
 
 ## Path tracking
 
