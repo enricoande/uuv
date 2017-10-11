@@ -88,14 +88,19 @@ Note that before you take this step, it is fundamental to have a C/C++ compiler 
 After the C files are compiled, it is possible to run the desired simulations.
 
 From the main project directory, first run
+
 `startup` 
+
 on the Matlab shell.
 
 Then, you can run any simulations. As an example, run
+
 `uuvSimRun` .
 
 When finished, run
+
 `cleanup`
+
 to clean up the temporary files and the Matlab path.
 
 # Supported UUVs
