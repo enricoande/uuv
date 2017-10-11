@@ -113,9 +113,9 @@ where $$\beta=\arcsin \frac{v}{U}$$ is the side slip angle, which compensates fo
 
 $$ \chi_\mathrm{d} = \alpha_k +\chi_\mathrm{r} , $$
 
-where $$ \alpha_k = \arctan \left( \frac{y_{k+1}-y_k}{x_{k+1}-x_k} \right) $$, with $k$ indicating the last waypoint that has been encountered and $$k+1$$ the next one, and $$ \chi_\mathrm{r} = \arctan \left( -k_\mathrm{p,steering} e(t) - \int_0^t k_\mathrm{i,steering} e(\tau) \mathrm{d} \tau \right), $$ where the cross-track error is given by
+where $$ \alpha_k = \arctan \left( \frac{y_{k+1}-y_k}{x_{k+1}-x_k} \right) $$, with $$k$$ indicating the last waypoint that has been encountered and $$k+1$$ the next one, and $$ \chi_\mathrm{r} = \arctan \left( -k_\mathrm{p,steering} e(t) - \int_0^t k_\mathrm{i,steering} e(\tau) \mathrm{d} \tau \right), $$ where the cross-track error $$e(t)$$ is given by
 
-$$ \begin{bmatrix} s(t) \\ e(t) \end{bmatrix} = \begin{bmatrix} \cos \alpha_k & \sin \alpha_k \\ -\sin \alpha_k \cos \alpha_k \end{bmatrix} \begin{bmatrix} x(t)-x_k \\ y(t)-y_k \end{bmatrix}. $$
+$$ \begin{bmatrix} s(t) \\ e(t) \end{bmatrix} = \begin{bmatrix} \cos \alpha_k & \sin \alpha_k \\ -\sin \alpha_k & \cos \alpha_k \end{bmatrix} \begin{bmatrix} x(t)-x_k \\ y(t)-y_k \end{bmatrix}. $$
 
 ### Vertical plane guidance
 
