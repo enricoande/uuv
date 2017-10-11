@@ -101,6 +101,29 @@ where $$\mathbf{\nu}_\mathrm{a}$$ is the vector of the velocity of the propeller
 
 ## LOS guidance
 
+At the moment, only a basic line-of-sight (LOS) guidance system is implemented. A number $$n$$ of waypoints through which the UUV should pass is specified as well as a fixed, non-zero forward speed, $$U$$. Motions in the horizontal and vertical planes are treated as decoupled. The desired heading is then computed in the horizontal plane with a simple line of sight scheme, while in the vertical plane the depth of the points is set as reference.
+
+### Horizontal plane guidance
+
+The desired heading angle is computed as 
+
+$$ \psi_\mathrm{d} = \chi_\mathrm{d} - \beta , $$
+
+where $$\beta=\arcsin \frac{v}{U}$$ is the side slip angle, which compensates for side currents and motions in bends, and $$\chi_\mathrm{d}$$ is the desired course angle. The latter is computed as
+
+$$ \chi_\mathrm{d} = \alpha_k +\chi_\mathrm{r} , $$
+
+where $$ \alpha_k = \arctan \left( \frac{y_{k+1}-y_k}{x_{k+1}-x_k} \right) $$, with $k$ indicating the last waypoint that has been encountered and $$k+1$$ the next one, and $$ \chi_\mathrm{r} = \arctan \left( -k_\mathrm{p,steering} e(t) - \int_0^t k_\mathrm{i,steering} e(\tau) \mathrm{d} \tau \right), $$ where the cross-track error is given by
+
+$$ \begin{bmatrix} s(t) \\ e(t) \end{bmatrix} = \begin{bmatrix} \cos \alpha_k & \sin \alpha_k \\ -\sin \alpha_k \cos \alpha_k \end{bmatrix} \begin{bmatrix} x(t)-x_k \\ y(t)-y_k \end{bmatrix}. $$
+
+### Vertical plane guidance
+
+At the moment, the desired depth is simply set based on the depth of the waypoints as
+
+$$ z_\mathrm{d} = z_{k+1} . $$
+
+However, not that this is valid mainly for ROVs, with AUVs requiring a setting for the pitch angle as well.
 
 ## PID controller
 
@@ -116,11 +139,11 @@ $$ \mathbf{p}_\mathrm{c} = \begin{bmatrix} p_\mathrm{c,speed} & 0 & p_\mathrm{c,
 
 Using simple PID controllers, it is possible to obtain the control parameters for speed, depth and heading as
 
-$$ p_\mathrm{c,speed} = -k_\mathrm{p,speed} \left( u(t)-u_\mathrm{d} (t) \right) - k_\mathrm{i,speed} \int_0^T \left( u(\tau)-u_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,speed} \left( \dot{u}(t)-\dot{u}_\mathrm{d} (t) \right), $$
+$$ p_\mathrm{c,speed} = -k_\mathrm{p,speed} \left( u(t)-u_\mathrm{d} (t) \right) - k_\mathrm{i,speed} \int_0^t \left( u(\tau)-u_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,speed} \left( \dot{u}(t)-\dot{u}_\mathrm{d} (t) \right), $$
 
-$$ p_\mathrm{c,depth} = -k_\mathrm{p,depth} \left( z(t)-z_\mathrm{d} (t) \right) - k_\mathrm{i,depth} \int_0^T \left( z(\tau)-z_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,depth} \left( \dot{z}(t)-\dot{z}_\mathrm{d} (t) \right), $$
+$$ p_\mathrm{c,depth} = -k_\mathrm{p,depth} \left( z(t)-z_\mathrm{d} (t) \right) - k_\mathrm{i,depth} \int_0^t \left( z(\tau)-z_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,depth} \left( \dot{z}(t)-\dot{z}_\mathrm{d} (t) \right), $$
 
-$$ p_\mathrm{c,heading} = -k_\mathrm{p,heading} \left( \psi(t)-\psi_\mathrm{d} (t) \right) - k_\mathrm{i,heading} \int_0^T \left( \psi(\tau)-\psi_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,heading} \left( \dot{\psi}(t)-\dot{\psi}_\mathrm{d} (t) \right), $$
+$$ p_\mathrm{c,heading} = -k_\mathrm{p,heading} \left( \psi(t)-\psi_\mathrm{d} (t) \right) - k_\mathrm{i,heading} \int_0^t \left( \psi(\tau)-\psi_\mathrm{d} (\tau) \right) \mathrm{d} \tau - k_\mathrm{d,heading} \left( \dot{\psi}(t)-\dot{\psi}_\mathrm{d} (t) \right), $$
 
 where $$k_\mathrm{p,speed}$$, $$k_\mathrm{i,speed}$$, $$k_\mathrm{d,speed}$$, $$k_\mathrm{p,depth}$$, $$k_\mathrm{i,depth}$$, $$k_\mathrm{d,depth}$$, $$k_\mathrm{p,heading}$$, $$k_\mathrm{i,heading}$$ and $$k_\mathrm{d,heading}$$ are the proportional, integral and derivative gains for the speed, depth and heading, respectively. Additionally, $$u_\mathrm{d}$$, $$z_\mathrm{d}$$ and $$\psi_\mathrm{d}$$ are the desired speed, depth and heading. At the moment, a very simple scheme is used that relies on a fixed forward speed setting, $U$. In order to prevent a big overshoot in tight corners, the desired speed is set as
 
