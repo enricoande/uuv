@@ -6,8 +6,9 @@ rmpath(fullfile(projectRootDir,'data'));
 rmpath(fullfile(projectRootDir,'extra'));
 rmpath(fullfile(projectRootDir,'functions'));
 rmpath(fullfile(projectRootDir,'models'));
-rmpath(fullfile(projectRootDir,'work'));
 rmpath(fullfile(projectRootDir,'scripts'));
+% rmpath(fullfile(projectRootDir,'simulator'));
+rmpath(fullfile(projectRootDir,'work'));
 
 %% Reset the loction of Simulink-generated files:
 Simulink.fileGenControl('reset');
