@@ -59,7 +59,7 @@ r = 0.1;
 tic;
 %% Load the Simulink file:
 % Simulink file:
-sfile = 'rovSim';
+sfile = 'rovSim_los';
 % Load the Simulink file:
 load_system(sfile);
 
