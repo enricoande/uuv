@@ -57,7 +57,7 @@
 #define I_U    0        // control input: no. prop. revs
 #define   I_USIZE  RW_N // size of input port
 #define I_V   1         // propellers speed in water
-#define   I_VSIZE  1    // size of input port
+#define   I_VSIZE  RW_N // size of input port
 #define I_N    2        // # of input ports
 
 // Output indices:
@@ -96,11 +96,11 @@ void propulsors_force(SimStruct *S)
     real_T theta, kt, J_a;
     for(i=0;i<RW_N;i++)
     {
-        // Compute the propulsor's advance ratio:
+        // Compute the propulsors' advance ratio:
         if (*n[i]==0)
             J_a=0.0;
         else
-            J_a = (*v_a[0])/(*n[i] *prop_diam[i]);
+            J_a = (*v_a[i])/(*n[i] *prop_diam[i]);
         // Compute the thrust loss factor:
         if (*n[i]>0)
         {

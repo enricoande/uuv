@@ -182,14 +182,13 @@ void damping_force(SimStruct *S)
     real_T D_Q[6][6];
     memcpy(D_Q,DQ1D,6*6*sizeof(real_T));
     // Counter:
-    int_T i;
+    int_T i, j;
     
     // Compute the damping force: 
-    for(i=0;i<DW_DSIZE;i++)
-    {
-        dw[i] = D_L[i][i]*vr[i] + D_Q[i][i]*fabs(vr[i])*vr[i];
-    }
-    // N.B.: This relies on the assumption of diagonal damping matrices.
+    for(i=0;i<DW_DSIZE;i++) {
+        dw[i] = 0.0;
+        for (j=0;j<DW_DSIZE;j++) {
+            dw[i] += D_L[i][j]*vr[j] + D_Q[i][j]*fabs(vr[j])*vr[j]; }  }
 }
 
 // ************************************************************************
@@ -261,8 +260,8 @@ void coriolis_force(SimStruct *S)
             SvG[i][j] = 0.0;
             SGv[i][j] = 0.0;
             for(k=0;k<3;k++) {
-                SvG[i][j] += Sv2[i*3+k]*SG[k*i+j];
-                SGv[i][j] += SG[i*3+k]*Sv2[k*i+j]; } } }
+                SvG[i][j] += Sv2[i*3+k]*SG[k*3+j];
+                SGv[i][j] += SG[i*3+k]*Sv2[k*3+j]; } } }
     // Assemble C_RB:
     k = 0;
     for(i=0;i<3;i++) {
@@ -273,7 +272,7 @@ void coriolis_force(SimStruct *S)
     k = 0;
     for(i=3;i<6;i++) {
         for(j=0;j<3;j++) {
-            CRB[i][j] = -m*Sv1[k] +m*SGv[i][j];
+            CRB[i][j] = -m*Sv1[k]+m*SGv[i-3][j];
             CRB[i][j+3] = -SIv[k];
             k++; } }
     
@@ -652,7 +651,96 @@ static void mdlInitializeConditions(SimStruct *S)
 //             printf("%f\t", M[k]);
 //             k++; }
 //         printf("\n");}
-  
+//     // Debugging Coriolis force:
+//     // Initialize x & v_r:
+//     int k;
+//     real_T X[12],Vr[6];
+//     for(i=0;i<6;i++) {
+//         X[i] = 1.0;
+//         X[i+6] = 1.0;
+//         Vr[i] = 1.0; }
+//     // Snatch and map the added mass matrix:
+//     const real_T *MA1D = mxGetPr(ssGetSFcnParam(S,P_MA));
+//     real_T M_A[6][6];
+//     memcpy(M_A,MA1D,6*6*sizeof(real_T));
+//     // Snatch and map the rigid body mass matrix:
+//     const real_T *MB1D = mxGetPr(ssGetSFcnParam(S,P_MB));
+//     real_T M_B[6][6];
+//     memcpy(M_B,MB1D,6*6*sizeof(real_T));
+//     // Define required variables:
+//     real_T Av[6], Sav1[9], Sav2[9], CA[6][6];
+//     real_T m, Sv1[9], Sv2[9], SG[9], Iv[3], SIv[9], SGv[3][3], SvG[3][3];
+//     real_T CRB[6][6];
+//     // Compute M_A*v_r: 
+//     for(i=0;i<6;i++) {
+//         Av[i] = 0.0;
+//         for(j=0;j<6;j++) {
+//             Av[i] += M_A[i][j]*Vr[j]; } }
+//     // Compute the skew symmetric matrices:
+//     skew_symmetric(Sav1,Av,0);
+//     skew_symmetric(Sav2,Av,3);
+//     // Assemble C_A:
+//     k = 0;
+//     for(i=0;i<3;i++) {
+//         for(j=0;j<3;j++) {
+//             CA[i][j] = 0.0;
+//             CA[i][j+3] = -Sav1[k];
+//             k++; } }
+//     k = 0;
+//     for(i=3;i<6;i++) {
+//         for(j=0;j<3;j++) {
+//             CA[i][j] = -Sav1[k];
+//             CA[i][j+3] = -Sav2[k];
+//             k++; } }
+// //     // Print C_A:
+// //     for (i=0;i<6;i++) {
+// //         for (j=0;j<6;j++) {
+// //             printf("%f\t", CA[i][j]); }
+// //         printf("\n");}
+//     // Store m for simplicity:
+//     m = M_B[0][0];
+//     // Compute Ib * v2:
+//     for(i=0;i<3;i++) {
+//         Iv[i] = 0.0;
+//         for(j=0;j<3;j++) {
+//             Iv[i] += M_B[i+3][j+3]*X[j+9]; } }
+//     // Compute the required skew symmetric matrices:
+//     skew_symmetric(Sv1,X,6);
+//     skew_symmetric(Sv2,X,9);
+//     skew_symmetric(SG,rw,RW_XG);
+//     skew_symmetric(SIv,Iv,0);
+//     // Compute S(v2)*S(G) & S(G)*S(v2):
+//     for(i=0;i<3;i++) {
+//         for(j=0;j<3;j++) {
+//             SvG[i][j] = 0.0;
+//             SGv[i][j] = 0.0;
+//             for(k=0;k<3;k++) {
+//                 SvG[i][j] += Sv2[i*3+k]*SG[k*3+j];
+//                 SGv[i][j] += SG[i*3+k]*Sv2[k*3+j]; } } }
+//     // Print SGv:
+//     for (i=0;i<3;i++) {
+//         for (j=0;j<3;j++) {
+//             printf("%f\t", (m*SGv[i][j])); }
+//         printf("\n");}
+//     // Assemble C_RB:
+//     k = 0;
+//     for(i=0;i<3;i++) {
+//         for(j=0;j<3;j++) {
+//             CRB[i][j] = 0.0;
+//             CRB[i][j+3] = -m*Sv1[k] -m*SvG[i][j];
+//             k++; } }
+//     k = 0;
+//     for(i=3;i<6;i++) {
+//         for(j=0;j<3;j++) {
+//             CRB[i][j] = -m*Sv1[k] +m*SGv[i-3][j];
+//             CRB[i][j+3] = -SIv[k];
+//             k++; } }
+//     // Print C_RB:
+//     for (i=0;i<6;i++) {
+//         for (j=0;j<6;j++) {
+//             printf("%f\t", CRB[i][j]); }
+//         printf("\n");}
+    
     // Initialize the state vector:
     for(i=0;i<C_N;i++) x[i]=ics[i];
 
@@ -711,6 +799,8 @@ static void mdlDerivatives(SimStruct *S)
   real_T tmp;    // temporary value
   
   real_T *dx = ssGetdX(S);         // ptr to right side of x' = f(x,u,t)
+  // set a pointer to the continous state vector
+  real_T *x  = ssGetContStates(S);
   
   // Set a pointer to the thrust vector:
   InputRealPtrsType thrust = ssGetInputPortRealSignalPtrs(S,I_T);
@@ -722,7 +812,7 @@ static void mdlDerivatives(SimStruct *S)
   
   // Compute the relative velocity:
   relative_velocity(S);
-  real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
+  //real_T *dw_vr = (real_T*) ssGetDWork(S,DW_VR);
   
   // Snatch and map the inverse mass matrix: 
   const real_T *M1D = mxGetPr(ssGetSFcnParam(S,P_M));
@@ -756,7 +846,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<3;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_tt[k]*dw_vr[j];
+          tmp += dw_tt[k]*x[j+6];
           k++;
       }
       dx[i] = tmp;
@@ -765,7 +855,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=3;i<6;i++){
       tmp = 0.0;
       for (j=0;j<3;j++){
-          tmp += dw_rt[k]*dw_vr[j+3];
+          tmp += dw_rt[k]*x[j+9];
           k++;
       }
       dx[i] = tmp;
@@ -773,7 +863,7 @@ static void mdlDerivatives(SimStruct *S)
   for (i=0;i<6;i++){
       tmp = 0.0;
       for (j=0;j<6;j++)
-          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]); //-dw_c[j]);
+          tmp += M_inv[i][j] * (*thrust[j]-dw_r[j]-dw_d[j]-dw_c[j]);
       dx[i+6] = tmp;
   }
 }
